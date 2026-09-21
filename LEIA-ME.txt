@@ -1,0 +1,25 @@
+COMÉRCIO EM FIGURINHA — SITE
+
+Arquivos separados:
+- index.html
+- css/style.css
+- js/script.js
+- assets/
+
+O formulário agora funciona em 4 etapas para ficar leve no celular:
+1. Escolha do pacote
+2. Comércio + WhatsApp + upload da logo
+3. 9 frases já preenchidas e editáveis
+4. Conferência e envio
+
+Pacotes:
+- Atendimento: R$ 39,90
+- Marketing: + R$ 25,00
+- Mascote: + R$ 29,90
+- Completo: R$ 79,90
+
+ENVIO
+O formulário está configurado para comercioemfigurinhas@gmail.com usando FormSubmit e enctype multipart/form-data para permitir o envio da imagem da logo como arquivo.
+Na primeira submissão, o FormSubmit pode pedir confirmação/ativação no e-mail de destino.
+
+Para testar o visual, abra index.html no navegador. Para o envio real, publique a pasta em uma hospedagem (Netlify, Vercel ou sua hospedagem própria).

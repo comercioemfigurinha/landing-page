@@ -1,0 +1,28 @@
+COMÉRCIO EM FIGURINHA — V3 PHP
+================================
+
+Esta versão NÃO usa Formspree nem FormSubmit.
+
+FLUXO
+1. O cliente preenche o formulário por etapas.
+2. O formulário envia os dados e a logo para enviar.php.
+3. O PHP monta um e-mail HTML e anexa a logo.
+4. O e-mail vai para comercioemfigurinhas@gmail.com.
+5. O cliente é redirecionado para sucesso.html.
+
+IMPORTANTE SOBRE HOSPEDAGEM
+- GitHub Pages NÃO executa PHP.
+- Suba estes arquivos em uma hospedagem com PHP (cPanel, Hostinger, HostGator, Locaweb etc.).
+- A estrutura de pastas deve ser mantida.
+- Requer PHP 8+ com extensão fileinfo e função mail() habilitada.
+
+TESTE
+Faça um envio real depois de publicar. Se aparecer a mensagem de que o servidor não conseguiu enviar o e-mail, a hospedagem bloqueia/desabilita mail(). Nesse caso, o próximo passo é configurar SMTP autenticado no PHP usando os dados SMTP da sua hospedagem.
+
+SEGURANÇA
+- Logo limitada a 5 MB.
+- Aceita somente PNG, JPG/JPEG e WEBP verificados pelo conteúdo do arquivo.
+- Inclui campo anti-spam invisível.
+
+DESTINO
+comercioemfigurinhas@gmail.com
