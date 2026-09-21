@@ -1,0 +1,100 @@
+COMÉRCIO EM FIGURINHA — V4 PARA GITHUB PAGES + EMAILJS
+=======================================================
+
+Esta versão NÃO usa PHP, FormSubmit ou Formspree.
+O site continua 100% estático e pode ficar no GitHub Pages.
+O envio é feito no navegador pelo EmailJS.
+
+ARQUIVOS IMPORTANTES
+--------------------
+index.html             página e formulário por etapas
+css/style.css          visual
+js/script.js           etapas, preços, frases e envio
+js/email-config.js     coloque aqui os 3 IDs do EmailJS
+sucesso.html           tela exibida depois do envio
+assets/                logo e imagem do site
+
+CONFIGURAÇÃO — UMA VEZ SÓ
+-------------------------
+1. Acesse https://www.emailjs.com/ e crie uma conta.
+2. Em "Email Services", adicione/conecte o serviço de e-mail que enviará
+   as mensagens. Pode conectar sua conta do Gmail.
+3. Crie um Email Template.
+4. Configure o destinatário do template como:
+   comercioemfigurinhas@gmail.com
+5. No template, use estes campos (os nomes são exatamente os enviados pelo site):
+
+   Comércio: {{Comercio}}
+   WhatsApp: {{WhatsApp}}
+   Pacote: {{Pacote}}
+   Valor: {{Valor}}
+   Frases:
+   {{Frases}}
+
+6. IMPORTANTE PARA RECEBER A LOGO:
+   Dentro do template, abra a área "Attachments".
+   Adicione um anexo do tipo "Form File Attachment".
+   No campo Parameter Name, coloque exatamente:
+
+   Logo
+
+   Isso corresponde ao <input type="file" name="Logo"> do site.
+
+7. Copie no painel do EmailJS:
+   - Public Key
+   - Service ID
+   - Template ID
+
+8. Abra js/email-config.js e substitua:
+
+   COLE_SUA_PUBLIC_KEY_AQUI
+   COLE_SEU_SERVICE_ID_AQUI
+   COLE_SEU_TEMPLATE_ID_AQUI
+
+9. Salve, envie todos os arquivos ao repositório e aguarde o GitHub Pages atualizar.
+
+EXEMPLO DE TEMPLATE DE E-MAIL
+-----------------------------
+Assunto:
+Novo pedido — {{Comercio}} — {{Valor}}
+
+Corpo:
+Novo contato pelo site Comércio em Figurinha
+
+COMÉRCIO
+{{Comercio}}
+
+WHATSAPP
+{{WhatsApp}}
+
+PACOTE
+{{Pacote}}
+
+VALOR
+{{Valor}}
+
+FRASES ESCOLHIDAS
+{{Frases}}
+
+A logo estará anexada ao e-mail se o Attachment "Logo" tiver sido configurado.
+
+TELA DE SUCESSO
+---------------
+Quando o EmailJS confirmar o envio, o cliente vai automaticamente para
+sucesso.html e vê:
+
+"Enviado! Recebemos suas informações. Logo entraremos em contato pelo
+WhatsApp para dar continuidade ao seu pedido."
+
+SEGURANÇA
+---------
+A Public Key do EmailJS foi feita para uso no navegador. Não coloque senha,
+senha de aplicativo do Gmail, chave privada ou credenciais SMTP nos arquivos
+do GitHub.
+
+Antes de divulgar, faça um teste real pelo endereço do GitHub Pages e confirme:
+- recebimento do e-mail;
+- logo anexada;
+- pacote e valor corretos;
+- frases corretas;
+- redirecionamento para sucesso.html.
