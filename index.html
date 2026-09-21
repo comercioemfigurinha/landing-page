@@ -63,9 +63,10 @@
         <p>O pacote de atendimento já vem selecionado. Adicione o que fizer sentido e veja o valor na hora.</p>
       </div>
 
-      <form id="leadForm" method="POST" enctype="multipart/form-data">
+      <form id="leadForm" action="enviar.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="Pacote" id="pacoteField">
         <input type="hidden" name="Valor" id="valorField">
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off">
 
         <div class="wizard-progress"><span id="progressFill"></span></div>
         <div class="wizard-label"><b id="stepLabel">1 de 4</b><span>Leva menos de 2 minutos</span></div>
@@ -85,7 +86,7 @@
           <div class="compact-fields">
             <label><span>Nome do comércio *</span><input required name="Comercio" placeholder="Ex.: Chiquinho Burgers"></label>
             <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
-            <label class="upload-box"><span>Envie a logo do seu comércio *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+            <label class="upload-box"><span>Envie a logo do seu comércio *</span><input required type="file" name="logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
           </div>
         </section>
 
@@ -114,8 +115,6 @@
   </main>
 
   <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha.</small></footer>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="js/email-config.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>
