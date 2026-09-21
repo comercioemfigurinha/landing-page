@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ff6a00">
+  <meta name="description" content="Figurinhas personalizadas para deixar o atendimento da sua empresa mais rápido, humano e memorável.">
+  <title>Comércio em Figurinha | Figurinhas personalizadas para sua marca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Comércio em Figurinha - início">
+      <img src="assets/logo.png" alt="Comércio em Figurinha">
+    </a>
+    <a class="top-cta" href="#montar">Montar meu pacote</a>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <span class="eyebrow">FIGURINHAS PERSONALIZADAS PARA EMPRESAS</span>
+        <h1>Seu atendimento com mais <span>personalidade.</span></h1>
+        <p>Transforme mensagens do dia a dia em figurinhas com a cara da sua marca — prontas para usar no WhatsApp.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#montar">Quero minhas figurinhas</a>
+          <a class="btn ghost" href="#como-funciona">Como funciona</a>
+        </div>
+        <div class="mini-proof"><b>9 figurinhas</b><span>•</span><b>a partir de R$ 39,90</b><span>•</span><b>personalizadas</b></div>
+      </div>
+      <div class="hero-art">
+        <div class="phone-card">
+          <img src="assets/post-feed.png" alt="Exemplo de figurinhas personalizadas em uma conversa no WhatsApp">
+        </div>
+      </div>
+    </section>
+
+    <section class="benefits" aria-label="Benefícios">
+      <article><span>❤</span><div><b>Atendimento mais humano</b><small>Respostas com personalidade e proximidade.</small></div></article>
+      <article><span>⚡</span><div><b>Respostas mais rápidas</b><small>Frases prontas para situações do dia a dia.</small></div></article>
+      <article><span>↗</span><div><b>Marca mais lembrada</b><small>Seu negócio presente até nas mensagens.</small></div></article>
+    </section>
+
+    <section class="how" id="como-funciona">
+      <div class="section-head">
+        <span class="eyebrow">SIMPLES DO COMEÇO AO FIM</span>
+        <h2>Você escolhe. A gente transforma em figurinha.</h2>
+      </div>
+      <div class="steps">
+        <article><i>1</i><h3>Monte seu pacote</h3><p>Escolha atendimento, marketing e, se precisar, criação de mascote.</p></article>
+        <article><i>2</i><h3>Conte sobre sua marca</h3><p>Envie os dados básicos do negócio e as frases que costuma usar.</p></article>
+        <article><i>3</i><h3>Receba a proposta</h3><p>Seus dados chegam para nossa equipe e seguimos com você pelo contato informado.</p></article>
+      </div>
+    </section>
+
+    <section class="builder" id="montar">
+      <div class="builder-intro">
+        <span class="eyebrow">MONTE DO SEU JEITO</span>
+        <h2>Qual pacote combina com seu negócio?</h2>
+        <p>O pacote de atendimento já vem selecionado. Adicione o que fizer sentido e veja o valor na hora.</p>
+      </div>
+
+      <form id="leadForm" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="Pacote" id="pacoteField">
+        <input type="hidden" name="Valor" id="valorField">
+
+        <div class="wizard-progress"><span id="progressFill"></span></div>
+        <div class="wizard-label"><b id="stepLabel">1 de 4</b><span>Leva menos de 2 minutos</span></div>
+
+        <section class="form-step active" data-step="1">
+          <div class="step-copy"><span>PASSO 1</span><h3>O que você quer nas suas figurinhas?</h3><p>O pacote de atendimento já está incluído. Toque nos adicionais se quiser.</p></div>
+          <div class="package-grid">
+            <label class="package fixed selected"><input type="checkbox" checked disabled><span class="check">✓</span><span class="package-icon">💬</span><span class="package-copy"><b>Atendimento</b><small>9 figurinhas para agilizar as respostas do dia a dia.</small><em>R$ 39,90</em></span><span class="included">INCLUÍDO</span></label>
+            <label class="package" id="marketingCard"><input type="checkbox" id="marketing"><span class="check">✓</span><span class="package-icon">📣</span><span class="package-copy"><b>Marketing</b><small>Figurinhas para lembrar seus clientes da sua marca.</small><em>+ R$ 25,00</em></span></label>
+            <label class="package" id="mascoteCard"><input type="checkbox" id="mascote"><span class="check">✓</span><span class="package-icon">🎨</span><span class="package-copy"><b>Criação de mascote</b><small>Se ainda não tem personagem, criamos um para sua marca.</small><em>+ R$ 29,90</em></span></label>
+          </div>
+          <div class="summary"><div><small>Seu pacote</small><strong id="summaryName">Atendimento</strong><span id="saving" hidden>Pacote completo com desconto aplicado</span></div><div class="total"><small>Total</small><strong id="total">R$ 39,90</strong></div></div>
+        </section>
+
+        <section class="form-step" data-step="2">
+          <div class="step-copy"><span>PASSO 2</span><h3>Agora, sua marca</h3><p>Só o essencial para conseguirmos preparar seu material.</p></div>
+          <div class="compact-fields">
+            <label><span>Nome do comércio *</span><input required name="Comercio" placeholder="Ex.: Chiquinho Burgers"></label>
+            <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
+            <label class="upload-box"><span>Envie a logo do seu comércio *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+          </div>
+        </section>
+
+        <section class="form-step" data-step="3">
+          <div class="step-copy"><span>PASSO 3</span><h3>Quais frases você quer usar?</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma.</p></div>
+          <div class="phrases-list" id="phrasesList"></div>
+          <input type="hidden" name="Frases" id="frasesField">
+        </section>
+
+        <section class="form-step" data-step="4">
+          <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Prontinho! Confira e envie</h3><p>Depois do envio, nossa equipe continua com você pelo WhatsApp informado.</p></div>
+          <div class="review-card" id="reviewCard"></div>
+          <label class="consent"><input type="checkbox" required><span>Concordo em enviar estes dados para que a equipe do Comércio em Figurinha entre em contato sobre meu pacote.</span></label>
+          <button class="submit" type="submit">Enviar meus dados <span>→</span></button>
+          <p class="form-note">Sem compromisso. Seus dados serão usados apenas para este atendimento.</p>
+        </section>
+
+        <div class="wizard-actions"><button type="button" class="back" id="backBtn" hidden>← Voltar</button><button type="button" class="next" id="nextBtn">Continuar →</button></div>
+      </form>
+    </section>
+
+    <section class="complete">
+      <div><span class="eyebrow light">MELHOR CUSTO-BENEFÍCIO</span><h2>Quer tudo? O pacote completo fica por <b>R$ 79,90</b></h2><p>Atendimento + Marketing + Criação de mascote, com desconto automático ao selecionar os dois adicionais.</p></div>
+      <a href="#montar" class="btn white">Montar pacote completo</a>
+    </section>
+  </main>
+
+  <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha.</small></footer>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="js/email-config.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
