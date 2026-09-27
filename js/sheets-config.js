@@ -3,5 +3,5 @@
 // 2) Depois de publicar o Apps Script como Web App, cole aqui a URL
 //    que termina em /exec
 window.SHEETS_CONFIG = {
-  scriptUrl: "COLE_AQUI_A_URL_DO_APPS_SCRIPT"
+  scriptUrl: "https://script.google.com/macros/s/AKfycbxN-hqPL9f02WmAQsP7njoMVf3H2Hp-HD42T58oH5kf4JMlz-oR4Wtusg1psu9eo6-n/exec"
 };
