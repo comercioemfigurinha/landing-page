@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel — Comércio em Figurinha</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--orange:#ff6900;--orange2:#ff8a00;--ink:#281006;--muted:#6f625d;--cream:#fff8f2;--line:#eadfd8}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
+  h1,h2,h3{font-family:"Baloo 2",Inter,sans-serif;margin:0}
+  header{background:#fff;padding:18px max(4vw,20px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  header h1{font-size:22px}
+  header b{color:var(--orange)}
+  .actions{display:flex;gap:10px}
+  button{font:800 14px Inter;border:0;border-radius:12px;padding:11px 16px;cursor:pointer;transition:.2s}
+  button:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
+  .btn-ghost{background:#fff;border:1px solid var(--line)!important;color:var(--ink)}
+
+  #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .gate-card{background:#fff;border-radius:24px;padding:36px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(61,26,5,.12);text-align:center}
+  .gate-card p{color:var(--muted);font-size:14px;margin:8px 0 20px}
+  .gate-card input{width:100%;border:1px solid var(--line);border-radius:12px;padding:14px 15px;font:inherit;margin-bottom:14px;outline:none}
+  .gate-card input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,105,0,.1)}
+  .gate-card button{width:100%}
+  .gate-error{color:#c62828;font-size:13px;min-height:18px;margin-bottom:6px}
+
+  main{max-width:1200px;margin:0 auto;padding:26px max(4vw,20px) 60px}
+  .status{color:var(--muted);font-size:13px;margin:0 0 18px}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(60,30,15,.06);display:flex;flex-direction:column;gap:12px}
+  .card-top{display:flex;gap:14px;align-items:center}
+  .card-top img{width:62px;height:62px;border-radius:14px;object-fit:cover;background:#f1e9e2;flex-shrink:0}
+  .card-top .noimg{width:62px;height:62px;border-radius:14px;background:#fff1e8;color:var(--orange);display:grid;place-items:center;font-size:22px;flex-shrink:0}
+  .card-top h3{font-size:18px}
+  .card-top small{color:var(--muted);display:block;margin-top:2px}
+  .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-top:1px solid var(--line);padding-top:10px}
+  .row b{font-weight:800}
+  .pill{display:inline-block;background:var(--cream);color:var(--orange);font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
+  .frases{font-size:12.5px;color:var(--muted);white-space:pre-wrap;background:var(--cream);border-radius:12px;padding:10px 12px;max-height:120px;overflow:auto}
+  .card-links{display:flex;gap:10px}
+  .card-links a{flex:1;text-align:center;font-size:13px;font-weight:800;padding:9px;border-radius:10px;background:var(--ink);color:#fff}
+  .card-links a.whats{background:#128c7e}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <h2>Painel de cadastros</h2>
+    <p>Digite a senha para ver os pedidos recebidos pelo site.</p>
+    <div class="gate-error" id="gateError"></div>
+    <input type="password" id="senhaInput" placeholder="Senha" autofocus>
+    <button class="btn-primary" id="entrarBtn">Entrar</button>
+  </div>
+</div>
+
+<div id="painel" hidden>
+  <header>
+    <h1>Comércio em Figurinha — <b>Painel</b></h1>
+    <div class="actions">
+      <button class="btn-ghost" id="refreshBtn">↻ Atualizar</button>
+      <button class="btn-ghost" id="sairBtn">Sair</button>
+    </div>
+  </header>
+  <main>
+    <p class="status" id="status"></p>
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<script src="js/sheets-config.js"></script>
+<script>
+const gate=document.querySelector('#gate'),painel=document.querySelector('#painel');
+const senhaInput=document.querySelector('#senhaInput'),gateError=document.querySelector('#gateError');
+const grid=document.querySelector('#grid'),status_=document.querySelector('#status');
+
+function scriptUrl(){
+  const cfg=window.SHEETS_CONFIG||{};
+  if(!cfg.scriptUrl||String(cfg.scriptUrl).includes('COLE_')) return null;
+  return cfg.scriptUrl;
+}
+
+async function carregar(senha){
+  const url=scriptUrl();
+  if(!url){gateError.textContent='Configuração pendente: cole a URL do Apps Script em js/sheets-config.js.';return}
+  gateError.textContent='';
+  status_.textContent='Carregando...';
+  try{
+    const res=await fetch(url+'?senha='+encodeURIComponent(senha));
+    const data=await res.json();
+    if(!data.ok){
+      if(data.error==='senha_invalida'){gateError.textContent='Senha incorreta.';return}
+      throw new Error(data.error||'Erro desconhecido');
+    }
+    sessionStorage.setItem('painel_senha',senha);
+    gate.hidden=true;painel.hidden=false;
+    render(data.registros||[]);
+  }catch(err){
+    console.error(err);
+    gateError.textContent='Não foi possível conectar. Tente novamente.';
+    status_.textContent='';
+  }
+}
+
+function render(registros){
+  status_.textContent=registros.length+' cadastro(s) recebido(s).';
+  if(!registros.length){grid.innerHTML='';status_.insertAdjacentHTML('afterend','<div class="empty" id="emptyMsg">Nenhum cadastro ainda.</div>');return}
+  document.querySelector('#emptyMsg')?.remove();
+  grid.innerHTML=registros.map(r=>{
+    const digits=(r.WhatsApp||'').replace(/\D/g,'');
+    const wa=digits?`https://wa.me/55${digits}`:'#';
+    const img=r.LogoUrl
+      ?`<img src="${r.LogoUrl}" alt="Logo ${r.Comercio||''}" loading="lazy">`
+      :`<div class="noimg">🖼️</div>`;
+    return `<div class="card">
+      <div class="card-top">
+        ${img}
+        <div><h3>${escapeHtml(r.Comercio||'Sem nome')}</h3><small>${escapeHtml(r.Data||'')}</small></div>
+      </div>
+      <div class="row"><span>Pacote</span><b>${escapeHtml(r.Pacote||'')}</b></div>
+      <div class="row"><span>Valor</span><span class="pill">${escapeHtml(r.Valor||'')}</span></div>
+      <div class="row"><span>WhatsApp</span><b>${escapeHtml(r.WhatsApp||'')}</b></div>
+      <div class="frases">${escapeHtml(r.Frases||'')}</div>
+      <div class="card-links">
+        <a class="whats" href="${wa}" target="_blank" rel="noopener">Abrir WhatsApp</a>
+        ${r.LogoFileId?`<a href="https://drive.google.com/file/d/${r.LogoFileId}/view" target="_blank" rel="noopener">Ver logo</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+document.querySelector('#entrarBtn').addEventListener('click',()=>carregar(senhaInput.value.trim()));
+senhaInput.addEventListener('keydown',e=>{if(e.key==='Enter')carregar(senhaInput.value.trim())});
+document.querySelector('#refreshBtn').addEventListener('click',()=>carregar(sessionStorage.getItem('painel_senha')||''));
+document.querySelector('#sairBtn').addEventListener('click',()=>{sessionStorage.removeItem('painel_senha');painel.hidden=true;gate.hidden=false;senhaInput.value='';senhaInput.focus()});
+
+const senhaSalva=sessionStorage.getItem('painel_senha');
+if(senhaSalva) carregar(senhaSalva);
+</script>
+</body>
+</html>
