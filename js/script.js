@@ -17,5 +17,44 @@ backBtn.addEventListener('click',()=>{current=Math.max(0,current-1);showStep()})
 whatsapp.addEventListener('input',e=>{let v=e.target.value.replace(/\D/g,'').slice(0,11);if(v.length>10)v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');else if(v.length>6)v=v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');else if(v.length>2)v=v.replace(/(\d{2})(\d+)/,'($1) $2');e.target.value=v});
 fileInput.addEventListener('change',()=>fileName.textContent=fileInput.files[0]?.name||'PNG, JPG ou WEBP');
 function review(){syncPhrases();document.querySelector('#reviewCard').innerHTML=`<div><small>Comércio</small><b>${form.Comercio.value}</b></div><div><small>WhatsApp</small><b>${form.WhatsApp.value}</b></div><div><small>Pacote</small><b>${pacoteField.value}</b></div><div><small>Valor</small><b>${valorField.value}</b></div><div class="wide"><small>Logo</small><b>${fileInput.files[0]?.name||'Imagem selecionada'}</b></div><div class="wide"><small>Frases</small><b>9 frases prontas para personalização</b></div>`}
-form.addEventListener('submit',e=>{syncPhrases();if(!form.checkValidity()){e.preventDefault();return}const btn=form.querySelector('.submit');btn.innerHTML='Enviando...';btn.disabled=true});
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result).split(',')[1]||'');
+    reader.onerror=()=>reject(new Error('Não foi possível ler o arquivo da logo.'));
+    reader.readAsDataURL(file);
+  });
+}
+form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  syncPhrases();
+  if(!form.checkValidity()){form.reportValidity();return}
+  const cfg=window.SHEETS_CONFIG||{};
+  const missing=!cfg.scriptUrl||String(cfg.scriptUrl).includes('COLE_');
+  if(missing){alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.');return}
+  const btn=form.querySelector('.submit'),old=btn.innerHTML;
+  btn.innerHTML='Enviando...';btn.disabled=true;
+  try{
+    const logo=fileInput.files[0];
+    const fd=new FormData();
+    fd.append('Comercio',form.Comercio.value);
+    fd.append('WhatsApp',form.WhatsApp.value);
+    fd.append('Pacote',pacoteField.value);
+    fd.append('Valor',valorField.value);
+    fd.append('Frases',document.querySelector('#frasesField').value);
+    if(logo){
+      fd.append('LogoBase64',await fileToBase64(logo));
+      fd.append('LogoName',logo.name);
+      fd.append('LogoType',logo.type||'image/png');
+    }
+    const res=await fetch(cfg.scriptUrl,{method:'POST',body:fd});
+    const data=await res.json().catch(()=>({ok:res.ok}));
+    if(!data.ok){throw new Error(data.error||'Falha ao gravar na planilha.')}
+    window.location.href='sucesso.html';
+  }catch(err){
+    console.error(err);
+    alert('Não foi possível enviar agora. Tente novamente em instantes.');
+    btn.innerHTML=old;btn.disabled=false;
+  }
+});
 document.querySelector('#year').textContent=new Date().getFullYear();updatePackage();showStep();
