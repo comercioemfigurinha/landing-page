@@ -47,18 +47,28 @@
         <h2>Você escolhe. A gente transforma em figurinha.</h2>
       </div>
       <div class="steps">
-        <article><i>1</i><h3>Conte sobre você</h3><p>Qual o nome do seu comércio e WhatsApp?</p></article>
+        <article><i>1</i><h3>Conte sobre você</h3><p>Qual o nome do seu comércio e seu WhatsApp para contato?</p></article>
         <article><i>2</i><h3>Escolha o estilo</h3><p>Utilizamos a sua logo ou criamos um mascote para sua marca</p></article>
         <article>
+          <i>3</i>
+          <h3>Pagamento seguro <span class="fas fa-shield-alt" style="color: #28a745; display: inline-block;" aria-hidden="true"></span></h3>
+          <p>
+            Após o pagamento iniciamos a preparação do material completo para sua aprovação.<br>Pix, cartão ou parcelado.
+            <a href="#faq" style="text-decoration: underline;">
+              Saiba mais. 
+            </a>
+          </p>
+        </article>
+<!--         <article>
           <i>3</i>
           <h3>Pagamento seguro</h3>
           <p>
             Pix, cartão ou parcelado, direto no checkout da 
-            <a href="#faq" style="text-decoration: none;">
+            <a href="#faq" style="text-decoration: underline;">
               Kiwify <span class="fas fa-shield-alt" style="color: #28a745; display: inline-block;" aria-hidden="true"></span>
             </a>
           </p>
-        </article>
+        </article> -->
         <article><i>4</i><h3>Aprovação pelo WhatsApp</h3><p>Você recebe o pacote completo para anlisar e alterar, após a aprovação te enviamos!</p></article>
       </div>
     </section>
@@ -115,8 +125,8 @@
         <section class="form-step" data-step="3">
           <div class="step-copy"><span>QUASE LÁ</span><h3>Tudo certo! Veja o que falta</h3><p id="summaryLine"></p></div>
           <div class="checklist-card"><div id="trackerBox"></div></div>
-          <button class="submit" type="submit">Fazer o pagamento <span>→</span></button>
-          <p class="form-note">Consulte o <a href="regulamento.html#cancelamento" style="color:var(--orange);font-weight:700">regulamento de cancelamento e reembolso</a>.</p>
+          <button class="submit" type="submit">Seguir com o pagamento <span>→</span></button>
+          <p class="form-note">Consulte o <a href="regulamento.html#cancelamento" style="color:var(--orange);font-weight:700" target="_blank">regulamento de cancelamento e reembolso</a>.</p>
           <p class="form-note">Ao continuar, você concorda em enviar estes dados para a equipe do Comércio em Figurinha entrar em contato sobre seu pedido. Você pode alterar o estilo escolhido depois, antes da aprovação final.</p>
         </section>
 
@@ -131,7 +141,7 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">Como funciona o pagamento? <span class="plus">+</span></button>
-        <div class="faq-a" id="kiwify"><p>O pagamento é feito direto no checkout seguro da <a href="https://www.reclameaqui.com.br/empresa/kiwify/" style="text-decoration:underline;color:#006bdd;font-weight:bold;">Kiwify</a>, por Pix, cartão de crédito (à vista ou parcelado) ou uma combinação entre os dois. Assim que confirmado, você já segue para enviar sua logo e as frases.</p></div>
+        <div class="faq-a" id="kiwify"><p>O pagamento é feito direto no checkout seguro da <a href="https://www.reclameaqui.com.br/empresa/kiwify/" style="text-decoration:underline;color:#006bdd;font-weight:bold;">Kiwify</a>, por Pix, cartão de crédito (à vista ou parcelado) ou uma combinação entre os dois. Assim que confirmado, você já segue para enviar sua logo e as frases.<br><a href="https://www.reclameaqui.com.br/empresa/kiwify/" style="font-style: italic;color: #006bdd;text-decoration: underline;">Acesse a página do Reclame Aqui da Kiwify.</a></p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Em quanto tempo recebo minhas figurinhas? <span class="plus">+</span></button>
@@ -143,7 +153,7 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">Posso pedir ajustes depois de receber o material? <span class="plus">+</span></button>
-        <div class="faq-a"><p>Sim. O material só é considerado pronto depois da sua aprovação pelo WhatsApp, se quiser trocar alguma frase ou ajustar algo no visual antes de aprovar, é só avisar por lá.</p></div>
+        <div class="faq-a"><p>O material só é considerado pronto depois da sua aprovação pelo WhatsApp, se quiser trocar alguma frase ou ajustar algo no visual antes de aprovar, é só avisar por lá.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">As figurinhas funcionam em qualquer WhatsApp? <span class="plus">+</span></button>
@@ -155,6 +165,9 @@
   <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
 
   <div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
+
+  <!-- Iframe para carregar o botão flutuante -->
+  <iframe src="whatsapp-icon.html" style="position: fixed; bottom: 0px; right: 0px; width: 80px; height: 80px; border: none; z-index: 9999; scrolling: no; overflow: hidden;"></iframe>
 
   <script src="js/sheets-config.js"></script>
   <script src="js/progress.js"></script>
