@@ -172,6 +172,7 @@ function render(){
       <div class="card-links">
         <a class="whats" href="${wa}" target="_blank" rel="noopener">Abrir WhatsApp</a>
         ${r.LogoFileId?`<a href="https://drive.google.com/file/d/${r.LogoFileId}/view" target="_blank" rel="noopener">Ver logo</a>`:''}
+        <button data-action="link-pagamento">Copiar link de pagamento</button>
         <button data-action="editar">Editar</button>
         <button class="btn-danger" data-action="excluir">Excluir</button>
       </div>
@@ -196,16 +197,32 @@ function render(){
 
   grid.querySelectorAll('.card').forEach(card=>{
     const userId=card.dataset.userid;
+    const registro=TODOS_REGISTROS.find(r=>r.UserId===userId);
     card.querySelector('[data-action="status"]').addEventListener('change',e=>atualizarCampo(userId,{StatusServico:e.target.value}));
     card.querySelector('[data-action="editar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.toggle('open'));
     card.querySelector('[data-action="cancelar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.remove('open'));
     card.querySelector('[data-action="excluir"]').addEventListener('click',()=>excluir(userId,card));
+    card.querySelector('[data-action="link-pagamento"]').addEventListener('click',e=>copiarLinkPagamento(registro,e.target));
     card.querySelector('[data-action="salvar"]').addEventListener('click',()=>{
       const campos={};
       card.querySelectorAll('[data-field]').forEach(el=>campos[el.dataset.field]=el.value);
       atualizarCampo(userId,campos,()=>card.querySelector('[data-edit-box]').classList.remove('open'));
     });
   });
+}
+
+function copiarLinkPagamento(registro,botao){
+  const cfg=window.SHEETS_CONFIG||{};
+  if(!cfg.kiwifyCheckoutUrl){alert('Configure kiwifyCheckoutUrl em js/sheets-config.js.');return}
+  const digits=(registro.WhatsApp||'').replace(/\D/g,'');
+  const params=new URLSearchParams({name:registro.Nome||'',phone:digits,s1:registro.UserId||''});
+  const link=`${cfg.kiwifyCheckoutUrl}?${params.toString()}`;
+  const marcarCopiado=()=>{const t=botao.textContent;botao.textContent='Link copiado!';setTimeout(()=>botao.textContent=t,1800)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(marcarCopiado).catch(()=>prompt('Copie o link:',link));
+  }else{
+    prompt('Copie o link:',link);
+  }
 }
 
 async function atualizarCampo(userId,campos,onOk){
