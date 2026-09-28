@@ -122,3 +122,32 @@
 @media (prefers-reduced-motion: reduce) {
   .pulse { animation: none; }
 }
+
+/* ================= Página de Regulamento ================= */
+.legal{max-width:760px;margin:0 auto;padding:60px max(6vw,22px) 40px}
+.legal-head{text-align:center;margin-bottom:50px}
+.legal-head h1{font-size:clamp(32px,4.5vw,46px);margin:12px 0 14px}
+.legal-head p{color:var(--muted);line-height:1.6;max-width:560px;margin:0 auto}
+.legal-body section{margin-bottom:38px}
+.legal-body h2{font-size:21px;margin-bottom:12px}
+.legal-body p{color:var(--muted);line-height:1.7;margin:0 0 10px}
+.legal-body ol,.legal-body ul{color:var(--muted);line-height:1.7;padding-left:20px;margin:0 0 10px}
+.legal-body li{margin-bottom:6px}
+.legal-body b{color:var(--ink)}
+.legal-body .muted-note{font-size:12.5px;color:#a08e85}
+
+.refund-box{background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:8px;margin:18px 0 20px;display:grid;gap:8px}
+.refund-row{background:#fff;border-radius:14px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.refund-when b{display:block;font-size:14.5px;color:var(--ink)}
+.refund-when small{display:block;color:var(--muted);margin-top:4px;line-height:1.4;font-size:12.5px}
+.refund-pct{flex:none;text-align:center;font-family:"Baloo 2";font-size:30px;color:var(--orange);line-height:1}
+.refund-pct span{display:block;font-family:Inter;font-size:10px;font-weight:700;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+
+.legal-back{text-align:center;margin-top:10px}
+.legal-back a{color:var(--orange);font-weight:800}
+
+@media(max-width:520px){
+  .legal{padding:40px 18px 30px}
+  .refund-row{flex-direction:column;align-items:flex-start;gap:8px;text-align:left}
+  .refund-pct{align-self:flex-end}
+}
