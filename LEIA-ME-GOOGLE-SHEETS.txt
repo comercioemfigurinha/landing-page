@@ -1,0 +1,42 @@
+COMÉRCIO EM FIGURINHA — CONFIGURAÇÃO (v2: pagamento Kiwify + pós-pagamento)
+
+FLUXO
+1. Site (index.html): nome, comércio, WhatsApp -> escolha Logo/Mascote -> cria linha "pendente" na planilha
+   -> redireciona para a Kiwify com ?name=&phone=&s1=usr_xxxx
+2. Kiwify avisa o Apps Script via webhook quando o pagamento muda de status.
+3. Kiwify redireciona para sucesso.html: cliente envia logo/foto + 9 frases (editáveis).
+4. Tela final "em produção" + botão do seu WhatsApp.
+5. admin.html: lista, filtra por status, altera status, edita dados e exclui.
+
+PASSO A PASSO
+A) PLANILHA + APPS SCRIPT
+ 1. Crie uma planilha no Google Sheets. Extensões > Apps Script.
+ 2. Cole o conteúdo de google-apps-script/Code.gs.
+ 3. Crie uma pasta no Google Drive para as logos; copie o ID (parte final da URL) para FOLDER_ID.
+ 4. Defina SENHA_ADMIN (senha do painel).
+ 5. Implantar > Nova implantação > Tipo: App da Web
+    Executar como: Eu | Quem tem acesso: Qualquer pessoa. Autorize e copie a URL (/exec).
+ 6. Cole essa URL em js/sheets-config.js (scriptUrl).
+ IMPORTANTE: toda vez que alterar o Code.gs, faça Implantar > Gerenciar implantações > Editar > Nova versão.
+
+B) WEBHOOK NA KIWIFY
+ 1. Kiwify > Apps > Webhooks > criar webhook.
+ 2. URL: a mesma URL /exec do Apps Script (sem parâmetros).
+ 3. Eventos: compra aprovada, compra recusada, reembolsada (e pix gerado, se quiser).
+ 4. Copie o token gerado e cole em KIWIFY_WEBHOOK_TOKEN no Code.gs (reimplante depois).
+ 5. Faça uma compra de teste e abra a aba "WebhookLogs" da planilha: todo payload recebido fica salvo lá.
+    Se StatusPagamento não atualizar, confira nesse log o nome real dos campos (s1, status, forma de pagamento)
+    e ajuste a função extrairDadosWebhook_ no Code.gs.
+ 6. Em Kiwify, configure a página de obrigado do produto para a URL do seu sucesso.html.
+
+C) IMAGENS (substitua mantendo os nomes, em assets/)
+ estilo-logo.jpg, estilo-mascote.jpg (1:1)  |  exemplo-1.jpg ... exemplo-4.jpg (16:9)
+
+D) TESTE
+ Preencha o formulário no site, confira a linha "pendente" na planilha, pague (ou simule),
+ volte em sucesso.html, envie logo/frases e veja o painel em admin.html.
+
+OBSERVAÇÕES
+- Se o cliente abrir sucesso.html em outro aparelho, o site pede o WhatsApp e localiza o pedido.
+- Status do serviço (admin): A pagar, Pago, Em aprovação, Concluído, Recusado, Reembolsado.
+- O webhook marca "Pago" automaticamente; os demais status você altera no painel.

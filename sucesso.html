@@ -1,1 +1,184 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ff6a00"><title>Enviado! | Comércio em Figurinha</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"><style>.success-page{min-height:100vh;display:grid;place-items:center;padding:28px;background:#fff7f0}.success-card{width:min(620px,100%);background:white;border-radius:28px;padding:44px 30px;text-align:center;box-shadow:0 20px 70px rgba(40,20,0,.12)}.success-card img{width:180px;max-width:60%;margin-bottom:22px}.success-icon{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#ff6a00;color:#fff;font-size:34px;font-weight:800}.success-card h1{font-family:'Baloo 2',sans-serif;font-size:clamp(34px,8vw,52px);line-height:1;margin:0 0 14px}.success-card p{font-size:18px;line-height:1.6;color:#5e554e;margin:0 auto 26px;max-width:470px}.success-card a{display:inline-block;background:#ff6a00;color:white;text-decoration:none;font-weight:800;padding:15px 24px;border-radius:14px}</style></head><body><main class="success-page"><section class="success-card"><img src="assets/logo.png" alt="Comércio em Figurinha"><div class="success-icon">✓</div><h1>Enviado!</h1><p>Recebemos suas informações. <strong>Logo entraremos em contato pelo WhatsApp</strong> para dar continuidade ao seu pedido.</p><a href="index.html">Voltar ao início</a></section></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ff6a00">
+<title>Pagamento confirmado | Comércio em Figurinha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .success-page{min-height:100vh;padding:36px 20px 60px;background:#fff7f0}
+  .success-wrap{max-width:700px;margin:0 auto}
+  .success-header{text-align:center;margin-bottom:26px}
+  .success-header img{width:130px}
+  .success-header h1{font-size:clamp(28px,5vw,38px);margin:14px 0 6px}
+  .success-header p{color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<main class="success-page">
+  <div class="success-wrap">
+    <div class="success-header">
+      <img src="assets/logo.png" alt="Comércio em Figurinha">
+      <h1>Pagamento confirmado! 🎉</h1>
+      <p>Falta só um passo para colocarmos suas figurinhas em produção.</p>
+    </div>
+
+    <div class="tracker-wrap"><div id="trackerBox"></div></div>
+
+    <!-- Buscar pedido quando não há dados salvos neste navegador -->
+    <div class="post-form" id="lookupBox" hidden>
+      <div class="step-copy"><span>PRECISAMOS CONFIRMAR</span><h3>Qual o WhatsApp usado na compra?</h3><p>Não encontramos seu pedido neste navegador — provavelmente você pagou em outro aparelho.</p></div>
+      <div class="compact-fields">
+        <label><span>Seu WhatsApp *</span><input id="lookupWhatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
+      </div>
+      <button class="submit" type="button" id="lookupBtn" style="margin-top:16px">Continuar</button>
+      <p class="form-note" id="lookupError" style="color:#c62828"></p>
+    </div>
+
+    <!-- Formulário de logo + frases -->
+    <form class="post-form" id="postForm" hidden>
+      <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Envie sua logo (ou foto) e as frases</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma agora — dá pra ajustar de novo na hora da aprovação.</p></div>
+      <div class="compact-fields">
+        <label class="upload-box"><span>Envie a logo ou uma foto de perfil do seu comércio *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+      </div>
+      <div class="phrases-list" id="phrasesList" style="margin-top:22px"></div>
+      <input type="hidden" name="Frases" id="frasesField">
+      <button class="submit" type="submit" style="margin-top:22px">Enviar e finalizar <span>→</span></button>
+      <p class="form-note">Isso pode levar alguns segundos para processar — não feche esta página.</p>
+    </form>
+
+    <!-- Tela final -->
+    <div class="final-card" id="finalCard" hidden>
+      <div class="big-check">✓</div>
+      <h2>Recebemos tudo, obrigado!</h2>
+      <ul>
+        <li>✅ <span><b>Nossa equipe já está com o serviço em produção.</b></span></li>
+        <li>📦 <span>Em até <b>2 dias úteis</b> será enviado o material completo para aprovação pelo seu WhatsApp cadastrado.</span></li>
+        <li>🎉 <span>Aprovando, enviamos o <b>pacote completo de figurinhas!</b></span></li>
+      </ul>
+      <p style="color:var(--muted)">Ficou com alguma dúvida ou quer acompanhar o andamento? Fale direto com a gente:</p>
+      <a class="whats-support" id="whatsSupportLink" target="_blank" rel="noopener">💬 Falar no WhatsApp</a>
+      <p style="margin-top:26px"><a href="index.html" style="color:var(--orange);font-weight:800">Voltar ao início</a></p>
+    </div>
+  </div>
+</main>
+
+<div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
+
+<script src="js/sheets-config.js"></script>
+<script src="js/progress.js"></script>
+<script>
+const lookupBox = document.querySelector('#lookupBox');
+const postForm = document.querySelector('#postForm');
+const finalCard = document.querySelector('#finalCard');
+const fileInput = document.querySelector('#logoUpload');
+const fileName = document.querySelector('#fileName');
+const defaults = ['Muito Obrigado.','Já vamos te atender.','PIX recebido!','Só um momento...','Pedido recebido!','Volte sempre!','Boa noite!','Saiu para entrega!','Obrigado pela preferência.'];
+
+document.querySelector('#whatsSupportLink').href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
+
+function montarFrases() {
+  document.querySelector('#phrasesList').innerHTML = defaults.map((x,i)=>`<label class="phrase-row"><b>${i+1}</b><input name="frase_${i+1}" value="${x}" aria-label="Frase ${i+1}"><span>✎</span></label>`).join('');
+}
+function syncPhrases() {
+  document.querySelector('#frasesField').value = [...document.querySelectorAll('.phrase-row input')].map((x,i)=>`${i+1} - ${x.value}`).join('\n');
+}
+
+fileInput?.addEventListener('change', () => fileName.textContent = fileInput.files[0]?.name || 'PNG, JPG ou WEBP');
+
+function iniciarFormulario(lead) {
+  CEF.setLead(lead);
+  CEF.setProgress({ dados: true, estilo: true, pagamento: true });
+  CEF.renderTracker(document.querySelector('#trackerBox'));
+  lookupBox.hidden = true;
+  postForm.hidden = false;
+  montarFrases();
+}
+
+document.querySelector('#lookupBtn').addEventListener('click', async () => {
+  const cfg = window.SHEETS_CONFIG || {};
+  const numero = document.querySelector('#lookupWhatsapp').value.replace(/\D/g,'');
+  const erro = document.querySelector('#lookupError');
+  erro.textContent = '';
+  if (!numero) { erro.textContent = 'Informe um WhatsApp válido.'; return; }
+  CEF.showLoading('Procurando seu pedido...');
+  try {
+    const res = await fetch(`${cfg.scriptUrl}?acao=buscar_por_whatsapp&whatsapp=${encodeURIComponent(numero)}`);
+    const data = await res.json();
+    CEF.hideLoading();
+    if (!data.ok) { erro.textContent = 'Não encontramos nenhum pedido com esse WhatsApp. Confira o número ou fale com a gente no suporte.'; return; }
+    iniciarFormulario({ userId: data.pedido.UserId, nome: data.pedido.Nome, comercio: data.pedido.Comercio, estilo: data.pedido.Estilo });
+  } catch (err) {
+    CEF.hideLoading();
+    erro.textContent = 'Não foi possível buscar agora. Tente novamente.';
+  }
+});
+
+postForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  syncPhrases();
+  if (!postForm.checkValidity()) { postForm.reportValidity(); return; }
+  const cfg = window.SHEETS_CONFIG || {};
+  const lead = CEF.getLead();
+  if (!lead.userId) { alert('Não encontramos seu pedido. Recarregue a página e informe seu WhatsApp.'); return; }
+
+  CEF.showLoading([
+    'Enviando sua logo...',
+    'Isso pode levar alguns segundos...',
+    'Estamos quase terminando...'
+  ]);
+
+  try {
+    const logo = fileInput.files[0];
+    const fd = new FormData();
+    fd.append('acao', 'finalizar');
+    fd.append('UserId', lead.userId);
+    fd.append('Comercio', lead.comercio || '');
+    fd.append('Frases', document.querySelector('#frasesField').value);
+    if (logo) {
+      fd.append('LogoBase64', await CEF.fileToBase64(logo));
+      fd.append('LogoName', logo.name);
+      fd.append('LogoType', logo.type || 'image/png');
+    }
+    const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({ ok: res.ok }));
+    if (!data.ok) throw new Error(data.error || 'Falha ao enviar.');
+
+    CEF.setProgress({ dados: true, estilo: true, pagamento: true, material: true });
+    CEF.renderTracker(document.querySelector('#trackerBox'));
+    CEF.hideLoading();
+    postForm.hidden = true;
+    finalCard.hidden = false;
+  } catch (err) {
+    console.error(err);
+    CEF.hideLoading();
+    alert('Não foi possível enviar agora. Tente novamente em instantes — seus dados não foram perdidos.');
+  }
+});
+
+// ---- Inicialização: tenta usar o que já está salvo neste navegador ----
+(function init() {
+  const progresso = CEF.getProgress();
+  const lead = CEF.getLead();
+
+  if (progresso.material) {
+    // Já finalizou antes (ex.: deu refresh na página) — mostra direto a tela final.
+    CEF.renderTracker(document.querySelector('#trackerBox'));
+    finalCard.hidden = false;
+    return;
+  }
+
+  if (lead.userId) {
+    iniciarFormulario(lead);
+  } else {
+    CEF.renderTracker(document.querySelector('#trackerBox'));
+    lookupBox.hidden = false;
+  }
+})();
+</script>
+</body>
+</html>

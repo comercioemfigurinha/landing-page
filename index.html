@@ -16,25 +16,20 @@
     <a class="brand" href="#inicio" aria-label="Comércio em Figurinha - início">
       <img src="assets/logo.png" alt="Comércio em Figurinha">
     </a>
-    <a class="top-cta" href="#montar">Montar meu pacote</a>
+    <a class="top-cta" href="#montar">Quero minhas figurinhas</a>
   </header>
 
   <main>
-    <section class="hero" id="inicio">
-      <div class="hero-copy">
+    <section class="hero" id="inicio" style="grid-template-columns:1fr;text-align:center;min-height:auto;padding-bottom:40px">
+      <div class="hero-copy" style="margin:auto">
         <span class="eyebrow">FIGURINHAS PERSONALIZADAS PARA EMPRESAS</span>
         <h1>Seu atendimento com mais <span>personalidade.</span></h1>
-        <p>Transforme mensagens do dia a dia em figurinhas com a cara da sua marca — prontas para usar no WhatsApp.</p>
-        <div class="hero-actions">
+        <p style="margin:0 auto">Transforme mensagens do dia a dia em figurinhas com a cara da sua marca, prontas para usar no WhatsApp. Com a sua logo ou com um mascote feito especialmente pra você.</p>
+        <div class="hero-actions" style="justify-content:center">
           <a class="btn primary" href="#montar">Quero minhas figurinhas</a>
           <a class="btn ghost" href="#como-funciona">Como funciona</a>
         </div>
-        <div class="mini-proof"><b>9 figurinhas</b><span>•</span><b>a partir de R$ 39,90</b><span>•</span><b>personalizadas</b></div>
-      </div>
-      <div class="hero-art">
-        <div class="phone-card">
-          <img src="assets/post-feed.png" alt="Exemplo de figurinhas personalizadas em uma conversa no WhatsApp">
-        </div>
+        <div class="mini-proof" style="justify-content:center"><b>9 figurinhas</b><span>•</span><b>por R$ 47,00</b><span>•</span><b>logo ou mascote, você escolhe</b></div>
       </div>
     </section>
 
@@ -50,71 +45,107 @@
         <h2>Você escolhe. A gente transforma em figurinha.</h2>
       </div>
       <div class="steps">
-        <article><i>1</i><h3>Monte seu pacote</h3><p>Escolha atendimento, marketing e, se precisar, criação de mascote.</p></article>
-        <article><i>2</i><h3>Conte sobre sua marca</h3><p>Envie os dados básicos do negócio e as frases que costuma usar.</p></article>
-        <article><i>3</i><h3>Receba a proposta</h3><p>Seus dados chegam para nossa equipe e seguimos com você pelo contato informado.</p></article>
+        <article><i>1</i><h3>Conte sobre você</h3><p>Qual o nome do seu comércio e WhatsApp?</p></article>
+        <article><i>2</i><h3>Escolha o estilo</h3><p>Utilizamos a sua logo ou criamos um mascote para sua marca</p></article>
+        <article><i>3</i><h3>Pagamento seguro</h3><p>Pix, cartão ou parcelado, direto no checkout da Kiwify.</p></article>
+        <article><i>4</i><h3>Aprovação pelo WhatsApp</h3><p>Você recebe o pacote completo para anlisar e alterar, após a aprovação te enviamos!</p></article>
       </div>
     </section>
 
     <section class="builder" id="montar">
       <div class="builder-intro">
-        <span class="eyebrow">MONTE DO SEU JEITO</span>
-        <h2>Qual pacote combina com seu negócio?</h2>
-        <p>O pacote de atendimento já vem selecionado. Adicione o que fizer sentido e veja o valor na hora.</p>
+        <span class="eyebrow">MONTE SUAS FIGURINHAS</span>
+        <h2>Um pacote só, sem complicação</h2>
+        <p>9 figurinhas personalizadas para o seu comércio. Escolha se quer usar a sua logo ou criar um mascote, <b>o resto é com a gente.</b></p>
       </div>
 
-      <form id="leadForm" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="Pacote" id="pacoteField">
-        <input type="hidden" name="Valor" id="valorField">
+      <div class="price-single"><small>Pacote completo</small><b>R$ 47,00</b><small>9 figurinhas prontas para o WhatsApp</small></div>
+
+      <form id="leadForm">
+        <input type="hidden" name="Estilo" id="estiloField">
 
         <div class="wizard-progress"><span id="progressFill"></span></div>
-        <div class="wizard-label"><b id="stepLabel">1 de 4</b><span>Leva menos de 2 minutos</span></div>
+        <div class="wizard-label"><b id="stepLabel">1 de 3</b><span>Leva menos de 2 minutos</span></div>
 
         <section class="form-step active" data-step="1">
-          <div class="step-copy"><span>PASSO 1</span><h3>O que você quer nas suas figurinhas?</h3><p>O pacote de atendimento já está incluído. Toque nos adicionais se quiser.</p></div>
-          <div class="package-grid">
-            <label class="package fixed selected"><input type="checkbox" checked disabled><span class="check">✓</span><span class="package-icon">💬</span><span class="package-copy"><b>Atendimento</b><small>9 figurinhas para agilizar as respostas do dia a dia.</small><em>R$ 39,90</em></span><span class="included">INCLUÍDO</span></label>
-            <label class="package" id="marketingCard"><input type="checkbox" id="marketing"><span class="check">✓</span><span class="package-icon">📣</span><span class="package-copy"><b>Marketing</b><small>Figurinhas para lembrar seus clientes da sua marca.</small><em>+ R$ 25,00</em></span></label>
-            <label class="package" id="mascoteCard"><input type="checkbox" id="mascote"><span class="check">✓</span><span class="package-icon">🎨</span><span class="package-copy"><b>Criação de mascote</b><small>Se ainda não tem personagem, criamos um para sua marca.</small><em>+ R$ 29,90</em></span></label>
+          <div class="step-copy"><span>PASSO 1</span><h3>Conte sobre você</h3><p>Só o essencial pra gente preparar o seu material.</p></div>
+          <div class="compact-fields">
+            <label><span>Seu nome *</span><input required name="Nome" placeholder="Ex.: Chiquinho"></label>
+            <label><span>Nome do comércio *</span><input required name="Comercio" placeholder="Ex.: Chiquinho Burgers"></label>
+            <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
           </div>
-          <div class="summary"><div><small>Seu pacote</small><strong id="summaryName">Atendimento</strong><span id="saving" hidden>Pacote completo com desconto aplicado</span></div><div class="total"><small>Total</small><strong id="total">R$ 39,90</strong></div></div>
         </section>
 
         <section class="form-step" data-step="2">
-          <div class="step-copy"><span>PASSO 2</span><h3>Agora, sua marca</h3><p>Só o essencial para conseguirmos preparar seu material.</p></div>
-          <div class="compact-fields">
-            <label><span>Nome do comércio *</span><input required name="Comercio" placeholder="Ex.: Chiquinho Burgers"></label>
-            <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
-            <label class="upload-box"><span>Envie a logo do seu comércio *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+          <div class="step-copy"><span>PASSO 2</span><h3>Qual estilo combina com sua marca?</h3><p>Se já tiver um mascote, aproveitamos e adaptamos nas figurinhas. Se não tiver, criamos um do zero.</p></div>
+          <div class="style-grid">
+            <label class="style-card" id="logoCard">
+              <input type="radio" name="estiloRadio" value="Logo" required>
+              <span class="check">✓</span>
+              <img src="assets/estilo-logo.jpg" alt="Exemplo de figurinhas usando apenas a logo do comércio">
+              <span class="style-card-label"><b>Só a logo</b><small>Figurinhas com a marca do seu comércio.</small></span>
+            </label>
+            <label class="style-card" id="mascoteCard">
+              <input type="radio" name="estiloRadio" value="Mascote" required>
+              <span class="check">✓</span>
+              <img src="assets/estilo-mascote.jpg" alt="Exemplo de figurinhas usando um mascote personalizado">
+              <span class="style-card-label"><b>Com mascote</b><small>Já tem um? Adaptamos. Não tem? Criamos.</small></span>
+            </label>
+          </div>
+          <button type="button" class="examples-toggle pulse" style="--pulse-speed:2s; --pulse-scale:1.02" id="examplesToggle">Clique para ver exemplos</button>
+          <div class="examples-strip" id="examplesStrip">
+            <figure><img src="assets/exemplo-1.jpg" alt="Exemplo de figurinha estilo logo"></figure>
+            <figure><img src="assets/exemplo-2.jpg" alt="Exemplo de figurinha estilo logo"></figure>
+            <figure><img src="assets/exemplo-3.jpg" alt="Exemplo de figurinha estilo mascote"></figure>
+            <figure><img src="assets/exemplo-4.jpg" alt="Exemplo de figurinha estilo mascote"></figure>
           </div>
         </section>
 
         <section class="form-step" data-step="3">
-          <div class="step-copy"><span>PASSO 3</span><h3>Quais frases você quer usar?</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma.</p></div>
-          <div class="phrases-list" id="phrasesList"></div>
-          <input type="hidden" name="Frases" id="frasesField">
-        </section>
-
-        <section class="form-step" data-step="4">
-          <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Prontinho! Confira e envie</h3><p>Depois do envio, nossa equipe continua com você pelo WhatsApp informado.</p></div>
-          <div class="review-card" id="reviewCard"></div>
-          <label class="consent"><input type="checkbox" required><span>Concordo em enviar estes dados para que a equipe do Comércio em Figurinha entre em contato sobre meu pacote.</span></label>
-          <button class="submit" type="submit">Enviar meus dados <span>→</span></button>
-          <p class="form-note">Sem compromisso. Seus dados serão usados apenas para este atendimento.</p>
+          <div class="step-copy"><span>QUASE LÁ</span><h3>Tudo certo! Veja o que falta</h3><p id="summaryLine"></p></div>
+          <div class="checklist-card"><div id="trackerBox"></div></div>
+          <button class="submit" type="submit">Fazer o pagamento <span>→</span></button>
+          <p class="form-note">Ao continuar, você concorda em enviar estes dados para a equipe do Comércio em Figurinha entrar em contato sobre seu pedido. Você pode alterar o estilo escolhido depois, antes da aprovação final.</p>
         </section>
 
         <div class="wizard-actions"><button type="button" class="back" id="backBtn" hidden>← Voltar</button><button type="button" class="next" id="nextBtn">Continuar →</button></div>
       </form>
     </section>
 
-    <section class="complete">
-      <div><span class="eyebrow light">MELHOR CUSTO-BENEFÍCIO</span><h2>Quer tudo? O pacote completo fica por <b>R$ 79,90</b></h2><p>Atendimento + Marketing + Criação de mascote, com desconto automático ao selecionar os dois adicionais.</p></div>
-      <a href="#montar" class="btn white">Montar pacote completo</a>
+    <section class="faq" id="faq">
+      <div class="section-head">
+        <span class="eyebrow">DÚVIDAS FREQUENTES</span>
+        <h2>Antes de continuar</h2>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Como funciona o pagamento? <span class="plus">+</span></button>
+        <div class="faq-a"><p>O pagamento é feito direto no checkout seguro da Kiwify, por Pix, cartão de crédito (à vista ou parcelado) ou uma combinação entre os dois. Assim que confirmado, você já segue para enviar sua logo e as frases.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Em quanto tempo recebo minhas figurinhas? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Em até 2 dias úteis após você enviar a logo/foto e as frases, nossa equipe manda o material completo para aprovação no seu WhatsApp. Aprovando, o pacote final é liberado na hora.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Não tenho mascote, preciso criar um? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Não precisa se preocupar com isso agora. Se você já tem um mascote, a gente aproveita e adapta nas figurinhas. Se não tiver, criamos um personagem do zero para a sua marcam sem custo adicional.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Posso pedir ajustes depois de receber o material? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Sim. O material só é considerado pronto depois da sua aprovação pelo WhatsApp, se quiser trocar alguma frase ou ajustar algo no visual antes de aprovar, é só avisar por lá.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">As figurinhas funcionam em qualquer WhatsApp? <span class="plus">+</span></button>
+        <div class="faq-a"><p>Sim, funcionam tanto no WhatsApp normal quanto no WhatsApp Business, em qualquer aparelho, é só adicionar o pacote de figurinhas recebido.</p></div>
+      </div>
     </section>
   </main>
 
   <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha.</small></footer>
+
+  <div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
+
   <script src="js/sheets-config.js"></script>
+  <script src="js/progress.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>

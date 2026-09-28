@@ -19,6 +19,7 @@
   button:hover{transform:translateY(-1px)}
   .btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
   .btn-ghost{background:#fff;border:1px solid var(--line)!important;color:var(--ink)}
+  .btn-danger{background:#fff;border:1px solid #f0c6c6!important;color:#c62828}
 
   #gate{min-height:100vh;padding:20px}
   #gate:not([hidden]){display:flex;align-items:center;justify-content:center}
@@ -30,10 +31,13 @@
   .gate-card button{width:100%}
   .gate-error{color:#c62828;font-size:13px;min-height:18px;margin-bottom:6px}
 
-  main{max-width:1200px;margin:0 auto;padding:26px max(4vw,20px) 60px}
+  main{max-width:1300px;margin:0 auto;padding:26px max(4vw,20px) 60px}
   .status{color:var(--muted);font-size:13px;margin:0 0 18px}
   .empty{text-align:center;color:var(--muted);padding:60px 20px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .filters button{background:#fff;border:1px solid var(--line)!important;color:var(--muted);padding:8px 14px;font-size:12.5px}
+  .filters button.active{background:var(--ink);color:#fff;border-color:var(--ink)!important}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
   .card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(60,30,15,.06);display:flex;flex-direction:column;gap:12px}
   .card-top{display:flex;gap:14px;align-items:center}
   .card-top img{width:62px;height:62px;border-radius:14px;object-fit:cover;background:#f1e9e2;flex-shrink:0}
@@ -43,10 +47,20 @@
   .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-top:1px solid var(--line);padding-top:10px}
   .row b{font-weight:800}
   .pill{display:inline-block;background:var(--cream);color:var(--orange);font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
+  .pill.pago{background:#e5f7ee;color:#1a8a4a}
+  .pill.recusado,.pill.reembolsado{background:#fdeaea;color:#c62828}
+  .pill.pendente{background:#fff3d9;color:#a1710a}
   .frases{font-size:12.5px;color:var(--muted);white-space:pre-wrap;background:var(--cream);border-radius:12px;padding:10px 12px;max-height:120px;overflow:auto}
-  .card-links{display:flex;gap:10px}
-  .card-links a{flex:1;text-align:center;font-size:13px;font-weight:800;padding:9px;border-radius:10px;background:var(--ink);color:#fff}
+  .status-select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:700 13px Inter;color:var(--ink);background:#fff}
+  .card-links{display:flex;gap:8px;flex-wrap:wrap}
+  .card-links a,.card-links button{flex:1;text-align:center;font-size:12.5px;font-weight:800;padding:9px;border-radius:10px;background:var(--ink);color:#fff;min-width:80px}
   .card-links a.whats{background:#128c7e}
+  .edit-fields{display:none;grid-template-columns:1fr 1fr;gap:8px}
+  .edit-fields.open{display:grid}
+  .edit-fields label{grid-column:span 2;font-size:11px;color:var(--muted);font-weight:800}
+  .edit-fields input,.edit-fields textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:13px Inter;margin-top:3px}
+  .edit-fields textarea{grid-column:span 2;min-height:80px}
+  .edit-fields .save-row{grid-column:span 2;display:flex;gap:8px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -71,6 +85,7 @@
   </header>
   <main>
     <p class="status" id="status"></p>
+    <div class="filters" id="filters"></div>
     <div class="grid" id="grid"></div>
   </main>
 </div>
@@ -80,12 +95,17 @@
 const gate=document.querySelector('#gate'),painel=document.querySelector('#painel');
 const senhaInput=document.querySelector('#senhaInput'),gateError=document.querySelector('#gateError');
 const grid=document.querySelector('#grid'),status_=document.querySelector('#status');
+const filtersBox=document.querySelector('#filters');
+let TODOS_REGISTROS=[];
+let FILTRO_ATUAL='Todos';
+const STATUS_OPCOES=['A pagar','Pago','Em aprovação','Concluído','Recusado','Reembolsado'];
 
 function scriptUrl(){
   const cfg=window.SHEETS_CONFIG||{};
   if(!cfg.scriptUrl||String(cfg.scriptUrl).includes('COLE_')) return null;
   return cfg.scriptUrl;
 }
+function senhaAtual(){ return sessionStorage.getItem('painel_senha')||''; }
 
 async function carregar(senha){
   const url=scriptUrl();
@@ -101,7 +121,9 @@ async function carregar(senha){
     }
     sessionStorage.setItem('painel_senha',senha);
     gate.hidden=true;painel.hidden=false;
-    render(data.registros||[]);
+    TODOS_REGISTROS=data.registros||[];
+    renderFiltros();
+    render();
   }catch(err){
     console.error(err);
     gateError.textContent='Não foi possível conectar. Tente novamente.';
@@ -109,43 +131,128 @@ async function carregar(senha){
   }
 }
 
-function render(registros){
-  status_.textContent=registros.length+' cadastro(s) recebido(s).';
-  if(!registros.length){grid.innerHTML='';status_.insertAdjacentHTML('afterend','<div class="empty" id="emptyMsg">Nenhum cadastro ainda.</div>');return}
-  document.querySelector('#emptyMsg')?.remove();
+function renderFiltros(){
+  const contagem={};
+  TODOS_REGISTROS.forEach(r=>{const s=r.StatusServico||'A pagar';contagem[s]=(contagem[s]||0)+1});
+  const grupos=['Todos',...STATUS_OPCOES];
+  filtersBox.innerHTML=grupos.map(g=>{
+    const n=g==='Todos'?TODOS_REGISTROS.length:(contagem[g]||0);
+    return `<button data-filtro="${g}" class="${g===FILTRO_ATUAL?'active':''}">${g} (${n})</button>`;
+  }).join('');
+  filtersBox.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{FILTRO_ATUAL=b.dataset.filtro;renderFiltros();render()}));
+}
+
+function render(){
+  const registros=FILTRO_ATUAL==='Todos'?TODOS_REGISTROS:TODOS_REGISTROS.filter(r=>(r.StatusServico||'A pagar')===FILTRO_ATUAL);
+  status_.textContent=registros.length+' de '+TODOS_REGISTROS.length+' cadastro(s).';
+  if(!registros.length){grid.innerHTML='<div class="empty">Nenhum cadastro nesse filtro.</div>';return}
   grid.innerHTML=registros.map(r=>{
     const digits=(r.WhatsApp||'').replace(/\D/g,'');
     const wa=digits?`https://wa.me/55${digits}`:'#';
     const img=r.LogoUrl
       ?`<img src="${r.LogoUrl}" alt="Logo ${r.Comercio||''}" loading="lazy">`
       :`<div class="noimg">🖼️</div>`;
-    return `<div class="card">
+    const pagCls=(r.StatusPagamento||'').toLowerCase();
+    return `<div class="card" data-userid="${r.UserId}">
       <div class="card-top">
         ${img}
-        <div><h3>${escapeHtml(r.Comercio||'Sem nome')}</h3><small>${escapeHtml(r.Data||'')}</small></div>
+        <div><h3>${escapeHtml(r.Comercio||'Sem nome')}</h3><small>${escapeHtml(r.Nome||'')} · ${escapeHtml(r.Data||'')}</small></div>
       </div>
-      <div class="row"><span>Pacote</span><b>${escapeHtml(r.Pacote||'')}</b></div>
+      <div class="row"><span>Estilo</span><b>${escapeHtml(r.Estilo||'')}</b></div>
       <div class="row"><span>Valor</span><span class="pill">${escapeHtml(r.Valor||'')}</span></div>
+      <div class="row"><span>Pagamento</span><span class="pill ${pagCls}">${escapeHtml(r.StatusPagamento||'pendente')}${r.FormaPagamento?' · '+escapeHtml(r.FormaPagamento):''}</span></div>
       <div class="row"><span>WhatsApp</span><b>${escapeHtml(r.WhatsApp||'')}</b></div>
-      <div class="frases">${escapeHtml(r.Frases||'')}</div>
+      <div class="row" style="align-items:center">
+        <span>Status do serviço</span>
+        <select class="status-select" data-action="status">
+          ${STATUS_OPCOES.map(s=>`<option value="${s}" ${s===(r.StatusServico||'A pagar')?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      ${r.Frases?`<div class="frases">${escapeHtml(r.Frases)}</div>`:''}
       <div class="card-links">
         <a class="whats" href="${wa}" target="_blank" rel="noopener">Abrir WhatsApp</a>
         ${r.LogoFileId?`<a href="https://drive.google.com/file/d/${r.LogoFileId}/view" target="_blank" rel="noopener">Ver logo</a>`:''}
+        <button data-action="editar">Editar</button>
+        <button class="btn-danger" data-action="excluir">Excluir</button>
+      </div>
+      <div class="edit-fields" data-edit-box>
+        <label>Nome<input data-field="Nome" value="${escapeAttr(r.Nome||'')}"></label>
+        <label>Comércio<input data-field="Comercio" value="${escapeAttr(r.Comercio||'')}"></label>
+        <label>WhatsApp<input data-field="WhatsApp" value="${escapeAttr(r.WhatsApp||'')}"></label>
+        <label>Estilo
+          <select data-field="Estilo">
+            <option value="Logo" ${r.Estilo==='Logo'?'selected':''}>Logo</option>
+            <option value="Mascote" ${r.Estilo==='Mascote'?'selected':''}>Mascote</option>
+          </select>
+        </label>
+        <label>Frases<textarea data-field="Frases">${escapeHtml(r.Frases||'')}</textarea></label>
+        <div class="save-row">
+          <button class="btn-primary" data-action="salvar" style="flex:1">Salvar</button>
+          <button class="btn-ghost" data-action="cancelar" style="flex:1">Cancelar</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+
+  grid.querySelectorAll('.card').forEach(card=>{
+    const userId=card.dataset.userid;
+    card.querySelector('[data-action="status"]').addEventListener('change',e=>atualizarCampo(userId,{StatusServico:e.target.value}));
+    card.querySelector('[data-action="editar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.toggle('open'));
+    card.querySelector('[data-action="cancelar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.remove('open'));
+    card.querySelector('[data-action="excluir"]').addEventListener('click',()=>excluir(userId,card));
+    card.querySelector('[data-action="salvar"]').addEventListener('click',()=>{
+      const campos={};
+      card.querySelectorAll('[data-field]').forEach(el=>campos[el.dataset.field]=el.value);
+      atualizarCampo(userId,campos,()=>card.querySelector('[data-edit-box]').classList.remove('open'));
+    });
+  });
+}
+
+async function atualizarCampo(userId,campos,onOk){
+  const url=scriptUrl(); if(!url) return;
+  try{
+    const fd=new FormData();
+    fd.append('acao','admin_atualizar');
+    fd.append('senha',senhaAtual());
+    fd.append('UserId',userId);
+    Object.entries(campos).forEach(([k,v])=>fd.append(k,v));
+    const res=await fetch(url,{method:'POST',body:fd});
+    const data=await res.json();
+    if(!data.ok){alert('Não foi possível salvar: '+(data.error||'erro desconhecido'));return}
+    const reg=TODOS_REGISTROS.find(r=>r.UserId===userId);
+    if(reg) Object.assign(reg,campos);
+    renderFiltros();render();
+    onOk&&onOk();
+  }catch(err){console.error(err);alert('Não foi possível salvar agora. Tente novamente.')}
+}
+
+async function excluir(userId,card){
+  if(!confirm('Tem certeza que quer excluir este cadastro? Essa ação não pode ser desfeita.')) return;
+  const url=scriptUrl(); if(!url) return;
+  try{
+    const fd=new FormData();
+    fd.append('acao','admin_excluir');
+    fd.append('senha',senhaAtual());
+    fd.append('UserId',userId);
+    const res=await fetch(url,{method:'POST',body:fd});
+    const data=await res.json();
+    if(!data.ok){alert('Não foi possível excluir: '+(data.error||'erro desconhecido'));return}
+    TODOS_REGISTROS=TODOS_REGISTROS.filter(r=>r.UserId!==userId);
+    renderFiltros();render();
+  }catch(err){console.error(err);alert('Não foi possível excluir agora. Tente novamente.')}
 }
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
+function escapeAttr(str){ return escapeHtml(str); }
 
 document.querySelector('#entrarBtn').addEventListener('click',()=>carregar(senhaInput.value.trim()));
 senhaInput.addEventListener('keydown',e=>{if(e.key==='Enter')carregar(senhaInput.value.trim())});
-document.querySelector('#refreshBtn').addEventListener('click',()=>carregar(sessionStorage.getItem('painel_senha')||''));
+document.querySelector('#refreshBtn').addEventListener('click',()=>carregar(senhaAtual()));
 document.querySelector('#sairBtn').addEventListener('click',()=>{sessionStorage.removeItem('painel_senha');painel.hidden=true;gate.hidden=false;senhaInput.value='';senhaInput.focus()});
 
-const senhaSalva=sessionStorage.getItem('painel_senha');
+const senhaSalva=senhaAtual();
 if(senhaSalva) carregar(senhaSalva);
 </script>
 </body>
