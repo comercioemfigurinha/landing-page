@@ -1,3 +1,0 @@
-Comércio em Figurinha — veja LEIA-ME-GOOGLE-SHEETS.txt para configurar (Apps Script, Kiwify e imagens).
-Arquivos: index.html (venda), sucesso.html (pós-pagamento), admin.html (painel),
-js/ (config, progresso, lógica), css/style.css, assets/ (imagens), google-apps-script/Code.gs (backend).
