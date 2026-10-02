@@ -1,6 +1,6 @@
 // Temas da landing page: lê ?tema=nome e aplica cores/textos de temas.csv
 (function(){
-var CSV_URL='temas.csv';try{CSV_URL=new URL('../temas.csv',document.currentScript.src).href}catch(e){}
+var CSV_URL='temas.csv',JS_URL='temas.js';try{var SRC=document.currentScript.src;CSV_URL=new URL('../temas.csv',SRC).href;JS_URL=new URL('../temas.js',SRC).href}catch(e){}
 var COLS=['tema','cor_principal','cor_secundaria','cor_texto','cor_fundo','cor_suave','eyebrow','titulo','subtitulo','btn_hero','btn_topo','titulo_form','ph_nome','ph_comercio','img_logo','img_mascote','img_ex1','img_ex2','img_ex3','img_ex4'];
 function parse(t){
   t=t.replace(/^\ufeff/,'');var rows=[],r=[],f='',q=false;
@@ -53,7 +53,13 @@ footer{background:color-mix(in srgb,var(--ink) 75%,#000)}footer p{color:var(--so
     var u=o[p[0]]||e.dataset.def;if(e.getAttribute('src')!==u)e.src=u;});
   var m=document.querySelector('meta[name=theme-color]');if(m&&o.cor_principal)m.content=o.cor_principal;
 }
-window.CEFTheme={csvUrl:CSV_URL,COLS:COLS,parse:parse,toCSV:toCSV,apply:apply,slug:slug};
+// Lê os temas do site: temas.csv (http/https) ou, abrindo direto do disco (file://), temas.js
+function loadSite(){
+  return fetch(CSV_URL,{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){return {l:parse(t),via:'temas.csv'}})
+  .catch(function(){return new Promise(function(res,rej){var s=document.createElement('script');s.src=JS_URL+'?v='+Date.now();
+    s.onload=function(){res({l:parse(window.CEF_TEMAS_CSV||''),via:'temas.js'})};s.onerror=function(){rej(new Error('sem temas'))};document.head.appendChild(s)})});
+}
+window.CEFTheme={csvUrl:CSV_URL,jsUrl:JS_URL,loadSite:function(){return loadSite().then(function(x){return x.l})},COLS:COLS,parse:parse,toCSV:toCSV,apply:apply,slug:slug};
 window.addEventListener('message',function(e){if(e.data&&e.data.cefTema)apply(e.data.cefTema)});
 var nome=slug(new URLSearchParams(location.search).get('tema'));
 if(!nome||window.CEF_EDITOR)return;
@@ -64,7 +70,11 @@ var done=function(){root.classList.remove('tema-loading')};
 setTimeout(done,1500);
 var ready=new Promise(function(r){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()});
 function acha(l){return (l||[]).filter(function(x){return slug(x.tema)===nome})[0]}
-function rascunho(){try{return acha(JSON.parse(localStorage.getItem('cef_temas')).list)}catch(e){}}
-var dados=fetch(CSV_URL,{cache:'no-cache'}).then(function(r){return r.ok?r.text():''}).then(function(t){return acha(parse(t))||rascunho()}).catch(rascunho);
-Promise.all([dados,ready]).then(function(a){if(a[0])apply(a[0])}).catch(function(){}).then(done);
+var info={};
+var dados=loadSite().then(function(x){info.via=x.via;info.total=x.l.length;return acha(x.l)}).catch(function(){info.erro=1});
+Promise.all([dados,ready]).then(function(a){if(a[0])apply(a[0]);else info.naoachou=1}).catch(function(){}).then(function(){
+  done();
+  if(new URLSearchParams(location.search).get('debug')){var d=document.createElement('div');d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#111;color:#fff;font:13px/1.4 system-ui;padding:10px 12px;border-radius:10px';
+    d.textContent='Tema "'+nome+'": '+(info.erro?'não consegui ler temas.csv nem temas.js':info.naoachou?'NÃO está nos temas do site':'aplicado')+(info.via?' | lido de '+info.via+' ('+info.total+' tema(s))':'')+' | '+CSV_URL;
+    document.body.appendChild(d)}});
 })();
