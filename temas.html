@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Temas da landing page</title>
+<style>
+:root{--o:#ff6900;--ink:#281006;--muted:#6f625d;--line:#eadfd8;--bg:#fff8f2}
+*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0 auto 0 0}
+button,select{font:700 13px inherit;font-family:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:9px 13px;cursor:pointer}
+button.p{background:var(--o);border-color:var(--o);color:#fff}button.d{color:#c62828}
+#aviso{display:none;background:#fff3cd;padding:10px 20px;font-size:13px}#aviso.on{display:block}
+main{display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:20px;padding:20px;max-width:1500px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+fieldset{background:#fff;border:1px solid var(--line);border-radius:14px;margin:0 0 14px;padding:14px}
+legend{font-weight:800;padding:0 6px}label{display:block;margin:0 0 12px;font-size:12px;color:var(--muted);font-weight:600}
+input[type=text],textarea{width:100%;margin-top:5px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;color:var(--ink)}
+input[type=color]{display:block;margin-top:5px;width:70px;height:36px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff}
+.cores{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+#prev{position:sticky;top:70px;height:calc(100vh - 90px)}
+#prev iframe{width:100%;height:100%;border:1px solid var(--line);border-radius:14px;background:#fff;transition:width .2s}
+#prev.cel iframe{width:390px;display:block;margin:auto}
+#link{font-size:12px;color:var(--muted);margin:6px 0 14px;word-break:break-all}
+.im{display:flex;align-items:center;gap:8px;margin:0 0 14px;flex-wrap:wrap}.im b{flex:1 0 100%;font-size:12px;color:var(--muted)}.im img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#fff}
+</style></head><body>
+<header><h1>Temas da landing page</h1>
+<select id="sel"></select><button id="novo">Novo</button><button id="dup">Duplicar</button><button id="del" class="d">Excluir</button>
+<button id="imp">Importar CSV</button><button id="baixar">Baixar temas.csv</button><button id="zipbtn" class="p">Baixar pacote com imagens (.zip)</button><input type="file" id="file" accept=".csv" hidden></header>
+<div id="local" style="display:none;background:#e7f1ff;padding:10px 20px;font-size:13px">Você abriu direto do computador (file://): o navegador não deixa ler o <b>temas.csv</b> sozinho. Clique em <b>Importar CSV</b> e escolha o seu temas.csv; depois disso o <b>index.html?tema=...</b> também funciona neste computador.</div>
+<div id="aviso">Há alterações que ainda não estão no site. Clique em <b>Baixar pacote com imagens (.zip)</b>, extraia na pasta do site (onde está o index.html) e envie para a hospedagem, substituindo o temas.csv antigo. Sem imagens novas, basta o <b>temas.csv</b>.</div>
+<main><section><div id="form"></div>
+<button id="salvar" class="p">Salvar tema</button> <button id="copiar">Copiar link</button><div id="link"></div></section>
+<section id="prev"><div style="margin-bottom:8px"><button id="cel">Ver como celular</button></div><iframe id="frame" src="index.html"></iframe></section></main>
+<script>window.CEF_EDITOR=1</script><script src="js/theme.js"></script>
+<script>
+var F=[['Cores',[['cor_principal','Principal (botões, destaques)','color'],['cor_secundaria','Secundária (degradê do botão)','color'],['cor_texto','Texto e rodapé','color'],['cor_fundo','Fundo das seções','color'],['cor_suave','Suave (ícones e topo)','color']]],
+['Textos',[['eyebrow','Frase pequena acima do título','text'],['titulo','Título (use *asteriscos* para destacar na cor principal)','text'],['subtitulo','Subtítulo','area'],['btn_hero','Botão principal','text'],['btn_topo','Botão do topo','text'],['titulo_form','Título da área do formulário','text']]],
+['Exemplos nos campos',[['ph_nome','Campo "Seu nome"','text'],['ph_comercio','Campo "Nome do comércio"','text']]],
+['Imagens do passo 2 (estilo e exemplos)',[['img_logo','Card "Só a logo"','img','assets/estilo-logo.jpg'],['img_mascote','Card "Com mascote"','img','assets/estilo-mascote.jpg'],['img_ex1','Exemplo 1 (logo)','img','assets/exemplo-1.jpg'],['img_ex2','Exemplo 2 (logo)','img','assets/exemplo-2.jpg'],['img_ex3','Exemplo 3 (mascote)','img','assets/exemplo-3.jpg'],['img_ex4','Exemplo 4 (mascote)','img','assets/exemplo-4.jpg']]]];
+var BASE={tema:'',cor_principal:'#ff6900',cor_secundaria:'#ff8a00',cor_texto:'#281006',cor_fundo:'#fff8f2',cor_suave:'#ffe5d0',eyebrow:'',titulo:'',subtitulo:'',btn_hero:'',btn_topo:'',titulo_form:'',ph_nome:'',ph_comercio:'',img_logo:'',img_mascote:'',img_ex1:'',img_ex2:'',img_ex3:'',img_ex4:''};
+var K='cef_temas',list=[],idx=-1,cur=Object.assign({},BASE),$=function(i){return document.getElementById(i)},S=CEFTheme.slug;
+function load(){try{var d=JSON.parse(localStorage.getItem(K));if(d&&d.list){list=d.list;return Promise.resolve(d.dirty)}}catch(e){}
+ return fetch(CEFTheme.csvUrl,{cache:'no-cache'}).then(function(r){return r.ok?r.text():''}).then(function(t){list=CEFTheme.parse(t)}).catch(function(){})}
+function persist(dirty){try{localStorage.setItem(K,JSON.stringify({list:list,dirty:dirty}))}catch(e){}$('aviso').classList.toggle('on',!!dirty)}
+function build(){$('form').innerHTML=F.map(function(g){return '<fieldset><legend>'+g[0]+'</legend>'+(g[0]=='Cores'?'<div class="cores">':'')+g[1].map(function(f){
+ var id='f_'+f[0];if(f[2]=='img')return '<div class="im"><b>'+f[1]+'</b><img id="t_'+f[0]+'" alt=""><button type="button" data-pick="'+f[0]+'">Escolher imagem</button><button type="button" data-reset="'+f[0]+'">Padrão</button></div>';return '<label>'+f[1]+(f[2]=='color'?'<input type="color" id="'+id+'">':f[2]=='area'?'<textarea rows="3" id="'+id+'"></textarea>':'<input type="text" id="'+id+'">')+'</label>'}).join('')+(g[0]=='Cores'?'</div>':'')+'</fieldset>'}).join('');
+ F.forEach(function(g){g[1].forEach(function(f){if(f[2]=='img')return;$('f_'+f[0]).addEventListener('input',function(e){cur[f[0]]=e.target.value;pv()})})})}
+function fill(){F.forEach(function(g){g[1].forEach(function(f){if(f[2]!='img')$('f_'+f[0]).value=cur[f[0]]||''})});pv(true);
+ $('link').textContent=cur.tema?location.href.replace(/[^\/?#]*([?#].*)?$/,'')+'?tema='+S(cur.tema):'Salve o tema para gerar o link.'}
+function pv(imgs){var o=Object.assign({},cur);Object.keys(o).forEach(function(k){if(k.indexOf('img_')!=0)return;if(imgs)o[k]=URLS[o[k]]||o[k];else delete o[k]});
+ try{$('frame').contentWindow.postMessage({cefTema:o},'*')}catch(e){}
+ if(imgs)F.forEach(function(g){g[1].forEach(function(f){if(f[2]!='img')return;var e=$('t_'+f[0]);if(e)e.src=URLS[cur[f[0]]]||cur[f[0]]||f[3]})})}
+var URLS={},BLOBS={},DB;
+function idb(){return DB||(DB=new Promise(function(ok,no){var r=indexedDB.open('cef_imgs',1);r.onupgradeneeded=function(){r.result.createObjectStore('i')};r.onsuccess=function(){ok(r.result)};r.onerror=no}))}
+function iput(k,b){return idb().then(function(d){var t=d.transaction('i','readwrite');t.objectStore('i').put(b,k)})}
+function iall(){return idb().then(function(d){return new Promise(function(ok){var o={},c=d.transaction('i').objectStore('i').openCursor();c.onsuccess=function(){var x=c.result;if(x){o[x.key]=x.value;x.continue()}else ok(o)}})})}
+function durl(b){return new Promise(function(ok){var r=new FileReader();r.onload=function(){ok(r.result)};r.readAsDataURL(b)})}
+function prep(file){return new Promise(function(ok,no){var im=new Image(),u=URL.createObjectURL(file);im.onload=function(){var s=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);c.toBlob(ok,'image/jpeg',.88);URL.revokeObjectURL(u)};im.onerror=no;im.src=u})}
+function escolherImg(slot){if(!cur.tema){alert('Clique em "Salvar tema" e dê um nome antes de anexar imagens, assim eu sei em qual pasta guardá-las.');return}
+ var inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+ inp.onchange=function(){var f=inp.files[0];if(!f)return;prep(f).then(function(b){var p='assets/temas/'+S(cur.tema)+'/'+slot.replace('img_','')+'-'+Date.now().toString(36)+'.jpg';BLOBS[p]=b;iput(p,b);return durl(b).then(function(u){URLS[p]=u;cur[slot]=p;pv(true)})}).catch(function(){alert('Não consegui ler essa imagem.')})};inp.click()}
+var CR=(function(){var t=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc(u){var c=-1;for(var i=0;i<u.length;i++)c=CR[(c^u[i])&255]^(c>>>8);return(c^-1)>>>0}
+function zip(files){var enc=new TextEncoder(),parts=[],cd=[],off=0,cs=0;
+ files.forEach(function(f){var n=enc.encode(f.name),d=f.data,c=crc(d),h=new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,n.length,true);
+  parts.push(h.buffer,n,d);
+  var e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(8,0x0800,true);e.setUint16(14,0x21,true);e.setUint32(16,c,true);e.setUint32(20,d.length,true);e.setUint32(24,d.length,true);e.setUint16(28,n.length,true);e.setUint32(42,off,true);
+  cd.push(e.buffer,n);off+=30+n.length+d.length;cs+=46+n.length});
+ var z=new DataView(new ArrayBuffer(22));z.setUint32(0,0x06054b50,true);z.setUint16(8,files.length,true);z.setUint16(10,files.length,true);z.setUint32(12,cs,true);z.setUint32(16,off,true);
+ return new Blob(parts.concat(cd,[z.buffer]),{type:'application/zip'})}
+function pacote(){var files=[{name:'temas.csv',data:new TextEncoder().encode('\ufeff'+CEFTheme.toCSV(list))}],seen={};
+ list.forEach(function(t){CEFTheme.COLS.forEach(function(c){var p=t[c];if(c.indexOf('img_')==0&&p&&BLOBS[p]&&!seen[p]){seen[p]=1;files.push({name:p,blob:BLOBS[p]})}})});
+ Promise.all(files.map(function(f){return f.blob?f.blob.arrayBuffer().then(function(a){f.data=new Uint8Array(a)}):0})).then(function(){
+  var a=document.createElement('a');a.href=URL.createObjectURL(zip(files));a.download='pacote-temas.zip';a.click();persist(false)})}
+function menu(){$('sel').innerHTML='<option value="-1">(tema novo)</option>'+list.map(function(t,i){return '<option value="'+i+'">'+t.tema+'</option>'}).join('');$('sel').value=idx}
+function pick(i){idx=i;cur=i>=0?Object.assign({},BASE,list[i]):Object.assign({},BASE);menu();fill()}
+$('sel').onchange=function(){pick(+this.value)};
+$('novo').onclick=function(){pick(-1)};
+$('dup').onclick=function(){cur.tema='';idx=-1;menu();fill()};
+$('del').onclick=function(){if(idx<0||!confirm('Excluir o tema "'+list[idx].tema+'"?'))return;list.splice(idx,1);persist(true);pick(-1)};
+$('salvar').onclick=function(){var n=prompt('Nome do tema (vai no link, ex.: confeitaria):',cur.tema||'');if(n===null)return;var s=S(n);if(!s){alert('Digite um nome com letras ou números.');return}
+ var i=list.findIndex(function(x){return S(x.tema)===s});if(i>=0&&i!==idx&&!confirm('Já existe o tema "'+s+'". Substituir?'))return;
+ cur.tema=s;if(i>=0)list[i]=Object.assign({},cur);else list.push(Object.assign({},cur));persist(true);pick(list.findIndex(function(x){return x.tema===s}))};
+$('copiar').onclick=function(){if(cur.tema&&navigator.clipboard)navigator.clipboard.writeText($('link').textContent)};
+$('baixar').onclick=function(){var b=new Blob(['\ufeff'+CEFTheme.toCSV(list)],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='temas.csv';a.click();persist(false)};
+$('imp').onclick=function(){$('file').click()};
+$('file').onchange=function(){var f=this.files[0];if(!f)return;f.text().then(function(t){if(!confirm('Trocar a lista atual pelos temas deste arquivo?'))return;list=CEFTheme.parse(t);persist(true);pick(-1)})};
+$('cel').onclick=function(){$('prev').classList.toggle('cel')};
+$('frame').onload=function(){pv(true)};$('zipbtn').onclick=pacote;$('form').addEventListener('click',function(e){var s=e.target.getAttribute('data-pick'),r=e.target.getAttribute('data-reset');if(s)escolherImg(s);if(r){cur[r]='';pv(true)}});
+if(location.protocol==='file:')$('local').style.display='block';build();load().then(function(d){persist(d);menu();fill();return iall()}).then(function(o){BLOBS=o;return Promise.all(Object.keys(o).map(function(k){return durl(o[k]).then(function(u){URLS[k]=u})}))}).then(function(){pv(true)}).catch(function(){});
+</script></body></html>
