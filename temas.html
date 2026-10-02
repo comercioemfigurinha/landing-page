@@ -24,9 +24,9 @@ input[type=color]{display:block;margin-top:5px;width:70px;height:36px;border:1px
 </style></head><body>
 <header><h1>Temas da landing page</h1>
 <select id="sel"></select><button id="novo">Novo</button><button id="dup">Duplicar</button><button id="del" class="d">Excluir</button>
-<button id="imp">Importar CSV</button><button id="baixar">Baixar temas.csv</button><button id="zipbtn" class="p">Baixar pacote com imagens (.zip)</button><input type="file" id="file" accept=".csv" hidden></header>
-<div id="local" style="display:none;background:#e7f1ff;padding:10px 20px;font-size:13px">Você abriu direto do computador (file://): o navegador não deixa ler o <b>temas.csv</b> sozinho. Clique em <b>Importar CSV</b> e escolha o seu temas.csv; depois disso o <b>index.html?tema=...</b> também funciona neste computador.</div>
-<div id="aviso">Há alterações que ainda não estão no site. Clique em <b>Baixar pacote com imagens (.zip)</b>, extraia na pasta do site (onde está o index.html) e envie para a hospedagem, substituindo o temas.csv antigo. Sem imagens novas, basta o <b>temas.csv</b>.</div>
+<button id="imp">Importar CSV</button><button id="comp">Comparar com o site</button><button id="doSite">Carregar do site</button><button id="zipbtn" class="p">Baixar pacote (.zip)</button><input type="file" id="file" accept=".csv" hidden></header>
+<div id="local" style="display:none;background:#e7f1ff;padding:10px 20px;font-size:13px">Aberto direto do computador (file://): o navegador não lê o <b>temas.csv</b>, então uso o <b>temas.js</b> da mesma pasta (vem no pacote .zip). Se ele não existir, use <b>Importar CSV</b>.</div>
+<div id="aviso">Há alterações que ainda não estão no site. Clique em <b>Baixar pacote com imagens (.zip)</b>, extraia na pasta do site (onde está o index.html) e envie para a hospedagem, substituindo o temas.csv e o temas.js antigos.</div>
 <main><section><div id="form"></div>
 <button id="salvar" class="p">Salvar tema</button> <button id="copiar">Copiar link</button><div id="link"></div></section>
 <section id="prev"><div style="margin-bottom:8px"><button id="cel">Ver como celular</button></div><iframe id="frame" src="index.html"></iframe></section></main>
@@ -39,7 +39,7 @@ var F=[['Cores',[['cor_principal','Principal (botões, destaques)','color'],['co
 var BASE={tema:'',cor_principal:'#ff6900',cor_secundaria:'#ff8a00',cor_texto:'#281006',cor_fundo:'#fff8f2',cor_suave:'#ffe5d0',eyebrow:'',titulo:'',subtitulo:'',btn_hero:'',btn_topo:'',titulo_form:'',ph_nome:'',ph_comercio:'',img_logo:'',img_mascote:'',img_ex1:'',img_ex2:'',img_ex3:'',img_ex4:''};
 var K='cef_temas',list=[],idx=-1,cur=Object.assign({},BASE),$=function(i){return document.getElementById(i)},S=CEFTheme.slug;
 function load(){try{var d=JSON.parse(localStorage.getItem(K));if(d&&d.list){list=d.list;return Promise.resolve(d.dirty)}}catch(e){}
- return fetch(CEFTheme.csvUrl,{cache:'no-cache'}).then(function(r){return r.ok?r.text():''}).then(function(t){list=CEFTheme.parse(t)}).catch(function(){})}
+ return CEFTheme.loadSite().then(function(l){list=l}).catch(function(){})}
 function persist(dirty){try{localStorage.setItem(K,JSON.stringify({list:list,dirty:dirty}))}catch(e){}$('aviso').classList.toggle('on',!!dirty)}
 function build(){$('form').innerHTML=F.map(function(g){return '<fieldset><legend>'+g[0]+'</legend>'+(g[0]=='Cores'?'<div class="cores">':'')+g[1].map(function(f){
  var id='f_'+f[0];if(f[2]=='img')return '<div class="im"><b>'+f[1]+'</b><img id="t_'+f[0]+'" alt=""><button type="button" data-pick="'+f[0]+'">Escolher imagem</button><button type="button" data-reset="'+f[0]+'">Padrão</button></div>';return '<label>'+f[1]+(f[2]=='color'?'<input type="color" id="'+id+'">':f[2]=='area'?'<textarea rows="3" id="'+id+'"></textarea>':'<input type="text" id="'+id+'">')+'</label>'}).join('')+(g[0]=='Cores'?'</div>':'')+'</fieldset>'}).join('');
@@ -68,7 +68,7 @@ function zip(files){var enc=new TextEncoder(),parts=[],cd=[],off=0,cs=0;
   cd.push(e.buffer,n);off+=30+n.length+d.length;cs+=46+n.length});
  var z=new DataView(new ArrayBuffer(22));z.setUint32(0,0x06054b50,true);z.setUint16(8,files.length,true);z.setUint16(10,files.length,true);z.setUint32(12,cs,true);z.setUint32(16,off,true);
  return new Blob(parts.concat(cd,[z.buffer]),{type:'application/zip'})}
-function pacote(){var files=[{name:'temas.csv',data:new TextEncoder().encode('\ufeff'+CEFTheme.toCSV(list))}],seen={};
+function pacote(){var csv=CEFTheme.toCSV(list),en=new TextEncoder(),files=[{name:'temas.csv',data:en.encode('\ufeff'+csv)},{name:'temas.js',data:en.encode('window.CEF_TEMAS_CSV='+JSON.stringify(csv)+';')}],seen={};
  list.forEach(function(t){CEFTheme.COLS.forEach(function(c){var p=t[c];if(c.indexOf('img_')==0&&p&&BLOBS[p]&&!seen[p]){seen[p]=1;files.push({name:p,blob:BLOBS[p]})}})});
  Promise.all(files.map(function(f){return f.blob?f.blob.arrayBuffer().then(function(a){f.data=new Uint8Array(a)}):0})).then(function(){
   var a=document.createElement('a');a.href=URL.createObjectURL(zip(files));a.download='pacote-temas.zip';a.click();persist(false)})}
@@ -82,10 +82,14 @@ $('salvar').onclick=function(){var n=prompt('Nome do tema (vai no link, ex.: con
  var i=list.findIndex(function(x){return S(x.tema)===s});if(i>=0&&i!==idx&&!confirm('Já existe o tema "'+s+'". Substituir?'))return;
  cur.tema=s;if(i>=0)list[i]=Object.assign({},cur);else list.push(Object.assign({},cur));persist(true);pick(list.findIndex(function(x){return x.tema===s}))};
 $('copiar').onclick=function(){if(cur.tema&&navigator.clipboard)navigator.clipboard.writeText($('link').textContent)};
-$('baixar').onclick=function(){var b=new Blob(['\ufeff'+CEFTheme.toCSV(list)],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='temas.csv';a.click();persist(false)};
 $('imp').onclick=function(){$('file').click()};
 $('file').onchange=function(){var f=this.files[0];if(!f)return;f.text().then(function(t){if(!confirm('Trocar a lista atual pelos temas deste arquivo?'))return;list=CEFTheme.parse(t);persist(true);pick(-1)})};
 $('cel').onclick=function(){$('prev').classList.toggle('cel')};
-$('frame').onload=function(){pv(true)};$('zipbtn').onclick=pacote;$('form').addEventListener('click',function(e){var s=e.target.getAttribute('data-pick'),r=e.target.getAttribute('data-reset');if(s)escolherImg(s);if(r){cur[r]='';pv(true)}});
+$('frame').onload=function(){pv(true)};$('zipbtn').onclick=pacote;
+function doSite(){return CEFTheme.loadSite()}
+var ERRO='Não consegui ler o temas.csv do site. Ele está na mesma pasta do index.html? (Abrindo direto do computador isso não funciona.)';
+$('comp').onclick=function(){doSite().then(function(sv){var m=[],d=[],ok=0;list.forEach(function(x){var y=sv.filter(function(z){return S(z.tema)===S(x.tema)})[0];if(!y)m.push(x.tema);else if(CEFTheme.COLS.some(function(c){return (x[c]||'')!==(y[c]||'')}))d.push(x.tema);else ok++});
+ alert('No site (temas.csv): '+sv.length+' tema(s).\n\nIguais ao painel: '+ok+'\nFaltando no site: '+(m.join(', ')||'nenhum')+'\nVersão diferente no site: '+(d.join(', ')||'nenhum')+(m.length||d.length?'\n\nO site (e o celular) só enxergam o que está no temas.csv enviado para a hospedagem. Baixe o pacote e envie.':'\n\nTudo igual: o site está atualizado.'))}).catch(function(){alert(ERRO)})};
+$('doSite').onclick=function(){if(!confirm('Trocar a lista do painel pelos temas que estão no site?'))return;doSite().then(function(sv){list=sv;persist(false);pick(-1)}).catch(function(){alert(ERRO)})};$('form').addEventListener('click',function(e){var s=e.target.getAttribute('data-pick'),r=e.target.getAttribute('data-reset');if(s)escolherImg(s);if(r){cur[r]='';pv(true)}});
 if(location.protocol==='file:')$('local').style.display='block';build();load().then(function(d){persist(d);menu();fill();return iall()}).then(function(o){BLOBS=o;return Promise.all(Object.keys(o).map(function(k){return durl(o[k]).then(function(u){URLS[k]=u})}))}).then(function(){pv(true)}).catch(function(){});
 </script></body></html>
