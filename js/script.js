@@ -77,10 +77,63 @@ document.querySelectorAll('.style-card input').forEach(input => {
   });
 });
 
-document.querySelector('#examplesToggle').addEventListener('click', function () {
-  const strip = document.querySelector('#examplesStrip');
-  const aberto = strip.classList.toggle('open');
-  this.textContent = aberto ? 'Ver menos exemplos' : 'Quero ver mais exemplos';
+// ---- Exemplos (carrossel clicável) ----
+const examplesStrip = document.querySelector('#examplesStrip');
+const examplesToggle = document.querySelector('#examplesToggle');
+const exTrack = document.querySelector('#exTrack');
+const exSlides = [...exTrack.children];
+const exDots = document.querySelector('#exDots');
+const exPrev = document.querySelector('#exPrev');
+const exNext = document.querySelector('#exNext');
+
+function setExamples(open) {
+  examplesStrip.classList.toggle('open', open);
+  examplesToggle.textContent = open ? 'Ver menos exemplos' : 'Clique para ver exemplos';
+  if (open) exTrack.scrollTo({ left: 0 });
+}
+examplesToggle.addEventListener('click', () => setExamples(!examplesStrip.classList.contains('open')));
+
+function goToSlide(i) {
+  const s = exSlides[Math.max(0, Math.min(i, exSlides.length - 1))];
+  exTrack.scrollTo({ left: s.offsetLeft - (exTrack.clientWidth - s.offsetWidth) / 2, behavior: 'smooth' });
+}
+function currentSlide() {
+  const centro = exTrack.scrollLeft + exTrack.clientWidth / 2;
+  let idx = 0, menor = Infinity;
+  exSlides.forEach((s, i) => {
+    const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - centro);
+    if (d < menor) { menor = d; idx = i; }
+  });
+  return idx;
+}
+function updateCarousel() {
+  const idx = currentSlide();
+  [...exDots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+  exPrev.disabled = idx === 0;
+  exNext.disabled = idx === exSlides.length - 1;
+}
+exSlides.forEach((_, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.setAttribute('aria-label', `Ir para o exemplo ${i + 1}`);
+  b.addEventListener('click', () => goToSlide(i));
+  exDots.appendChild(b);
+});
+exPrev.addEventListener('click', () => goToSlide(currentSlide() - 1));
+exNext.addEventListener('click', () => goToSlide(currentSlide() + 1));
+exTrack.addEventListener('scroll', () => requestAnimationFrame(updateCarousel), { passive: true });
+updateCarousel();
+
+// Clique no exemplo: seleciona o estilo, recolhe os exemplos e leva o olho até o "Continuar"
+exTrack.addEventListener('click', e => {
+  const hit = e.target.closest('.ex-hit');
+  if (!hit) return;
+  const radio = document.querySelector(`input[name="estiloRadio"][value="${hit.dataset.estilo}"]`);
+  if (!radio) return;
+  radio.checked = true;
+  radio.dispatchEvent(new Event('change', { bubbles: true })); // reaproveita o handler que marca o card e preenche o estiloField
+  setExamples(false);
+  setTimeout(() => nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 380);
 });
 
 // ---- FAQ ----
