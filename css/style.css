@@ -47,11 +47,44 @@
     background-color: #fd7801;
     box-shadow: 0px 0px 15px rgba(253, 120, 1, 0.8);
 }
-.examples-strip{max-width:900px;margin:20px auto 0;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;overflow:hidden;max-height:0;transition:max-height .35s ease}
-.examples-strip.open{max-height:900px}
-.examples-strip figure{margin:0;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line)}
-.examples-strip img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
-.examples-strip figcaption{padding:10px 12px;font-size:12.5px;color:var(--muted);font-weight:700}
+
+.examples-strip{max-width:900px;margin:20px auto 0;overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .25s ease}
+.examples-strip.open{max-height:700px;opacity:1}
+.examples-hint{text-align:center;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 12px}
+
+.ex-carousel{position:relative}
+.ex-track{position:relative;display:flex;gap:12px;overflow-x:auto;padding:4px 6%;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ex-track::-webkit-scrollbar{display:none}
+.ex-slide{position:relative;flex:0 0 88%;margin:0;scroll-snap-align:center;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line)}
+.ex-slide img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+
+/* áreas clicáveis: metade esquerda = logo, metade direita = mascote */
+.ex-hit{position:absolute;top:0;bottom:0;width:50%;border:0;padding:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.ex-hit.left{left:0}
+.ex-hit.right{right:0}
+.ex-hit:hover,.ex-hit:active,.ex-hit:focus-visible{background:rgba(255,105,0,.14);outline:2px solid var(--orange);outline-offset:-2px}
+
+.ex-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#fff;color:var(--ink);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(40,16,6,.2)}
+.ex-arrow.prev{left:2px}
+.ex-arrow.next{right:2px}
+.ex-arrow:disabled{opacity:.35;cursor:default}
+
+.ex-dots{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.ex-dots button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+.ex-dots button.active{background:var(--orange);width:22px;border-radius:6px}
+
+@media (max-width: 600px) {
+  .ex-track { padding: 4px 0; gap: 10px; }
+  .ex-slide { flex: 0 0 100%; }
+
+  /* setas menores e translúcidas para não cobrirem o exemplo */
+  .ex-arrow {
+    width: 30px; height: 30px; font-size: 20px;
+    background: rgba(255,255,255,.85);
+  }
+  .ex-arrow.prev { left: 6px; }
+  .ex-arrow.next { right: 6px; }
+}
 
 /* FAQ */
 .faq{padding:90px max(6vw,28px);max-width:820px;margin:0 auto}
