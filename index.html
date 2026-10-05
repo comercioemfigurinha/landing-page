@@ -134,12 +134,40 @@
             </label>
           </div>
           <button type="button" class="examples-toggle pulse" style="--pulse-speed:2s; --pulse-scale:1.02" id="examplesToggle">Clique para ver exemplos</button>
+
+
+          <!-- Exemplos de estilos -->
           <div class="examples-strip" id="examplesStrip">
-            <figure><img src="assets/exemplo-1.jpg" alt="Exemplo de figurinha estilo logo"></figure>
-            <figure><img src="assets/exemplo-2.jpg" alt="Exemplo de figurinha estilo logo"></figure>
-            <figure><img src="assets/exemplo-3.jpg" alt="Exemplo de figurinha estilo mascote"></figure>
-            <figure><img src="assets/exemplo-4.jpg" alt="Exemplo de figurinha estilo mascote"></figure>
+            <p class="examples-hint">Veja a diferença entre apenas logo ou mascote:</p>
+            <div class="ex-carousel">
+              <button type="button" class="ex-arrow prev" id="exPrev" aria-label="Exemplo anterior">‹</button>
+              <div class="ex-track" id="exTrack">
+                <figure class="ex-slide">
+                  <img src="assets/exemplo-1.jpg" alt="Exemplo 1: logo à esquerda, mascote à direita">
+                  <button type="button" class="ex-hit left"  data-estilo="Logo"    aria-label="Escolher só a logo"></button>
+                  <button type="button" class="ex-hit right" data-estilo="Mascote" aria-label="Escolher com mascote"></button>
+                </figure>
+                <figure class="ex-slide">
+                  <img src="assets/exemplo-2.jpg" alt="Exemplo 2: logo à esquerda, mascote à direita">
+                  <button type="button" class="ex-hit left"  data-estilo="Logo"    aria-label="Escolher só a logo"></button>
+                  <button type="button" class="ex-hit right" data-estilo="Mascote" aria-label="Escolher com mascote"></button>
+                </figure>
+                <figure class="ex-slide">
+                  <img src="assets/exemplo-3.jpg" alt="Exemplo 3: logo à esquerda, mascote à direita">
+                  <button type="button" class="ex-hit left"  data-estilo="Logo"    aria-label="Escolher só a logo"></button>
+                  <button type="button" class="ex-hit right" data-estilo="Mascote" aria-label="Escolher com mascote"></button>
+                </figure>
+                <figure class="ex-slide">
+                  <img src="assets/exemplo-4.jpg" alt="Exemplo 4: logo à esquerda, mascote à direita">
+                  <button type="button" class="ex-hit left"  data-estilo="Logo"    aria-label="Escolher só a logo"></button>
+                  <button type="button" class="ex-hit right" data-estilo="Mascote" aria-label="Escolher com mascote"></button>
+                </figure>
+              </div>
+              <button type="button" class="ex-arrow next" id="exNext" aria-label="Próximo exemplo">›</button>
+            </div>
+            <div class="ex-dots" id="exDots"></div>
           </div>
+          <!-- Exemplos de estilos -->
         </section>
 
         <section class="form-step" data-step="3">
