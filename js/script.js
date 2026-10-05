@@ -133,7 +133,7 @@ exTrack.addEventListener('click', e => {
   radio.checked = true;
   radio.dispatchEvent(new Event('change', { bubbles: true })); // reaproveita o handler que marca o card e preenche o estiloField
   setExamples(false);
-  setTimeout(() => nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 380);
+  // setTimeout(() => nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 380);
 });
 
 // ---- FAQ ----
