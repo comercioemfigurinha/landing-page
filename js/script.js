@@ -6,6 +6,27 @@ const whatsapp = document.querySelector('#whatsapp');
 const estiloField = document.querySelector('#estiloField');
 let current = 0;
 
+// UserId único desta visita: nasce na etapa 1 e é reaproveitado até o checkout,
+// assim a mesma linha da planilha vai sendo atualizada (sem duplicar).
+let userId = null;
+
+// Registra no admin até onde a pessoa chegou (etapa 1, 2 ou 3).
+// Não bloqueia a navegação: se falhar, o formulário segue normalmente.
+function salvarEtapa(etapa) {
+  const cfg = window.SHEETS_CONFIG || {};
+  if (!cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_')) return;
+  if (!userId) userId = CEF.gerarUserId();
+  const fd = new FormData();
+  fd.append('acao', 'criar_lead');
+  fd.append('Etapa', String(etapa));
+  fd.append('UserId', userId);
+  fd.append('Nome', form.Nome.value);
+  fd.append('Comercio', form.Comercio.value);
+  fd.append('WhatsApp', form.WhatsApp.value);
+  fd.append('Estilo', estiloField.value);
+  try { fetch(cfg.scriptUrl, { method: 'POST', body: fd, keepalive: true }).catch(() => {}); } catch {}
+}
+
 function showStep() {
   steps.forEach((s, i) => s.classList.toggle('active', i === current));
   progressFill.style.width = `${(current + 1) / steps.length * 100}%`;
@@ -53,8 +74,14 @@ function goTo(n, flip) {
 
 nextBtn.addEventListener('click', () => {
   if (!validStep()) return;
-  if (current === 0) CEF.setProgress({ dados: true });
-  if (current === 1) CEF.setProgress({ estilo: true });
+  if (current === 0) { CEF.setProgress({ dados: true }); salvarEtapa(1); }
+  if (current === 1) {
+    CEF.setProgress({ estilo: true });
+    salvarEtapa(2);
+    // Meta Pixel: evento padrão "Adicionar à lista de desejos" (AddToWishlist), disparado ao clicar
+    // em "Continuar" na etapa 2 (escolha do estilo). Usado como sinal de pré-cadastro.
+    try { if (typeof fbq === 'function') fbq('track', 'AddToWishlist', { content_name: 'PreCadastro', content_category: estiloField.value }); } catch {}
+  }
   const proximo = Math.min(current + 1, steps.length - 1);
   goTo(proximo, proximo === steps.length - 1); // flip só na entrada do checklist
 });
@@ -156,7 +183,7 @@ form.addEventListener('submit', async e => {
   const missing = !cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_');
   if (missing) { alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.'); return; }
 
-  const userId = CEF.gerarUserId();
+  if (!userId) userId = CEF.gerarUserId();
   const nome = form.Nome.value, comercio = form.Comercio.value, whatsappVal = form.WhatsApp.value, estilo = estiloField.value;
 
   CEF.showLoading([
@@ -168,6 +195,7 @@ form.addEventListener('submit', async e => {
   try {
     const fd = new FormData();
     fd.append('acao', 'criar_lead');
+    fd.append('Etapa', '3');
     fd.append('UserId', userId);
     fd.append('Nome', nome);
     fd.append('Comercio', comercio);

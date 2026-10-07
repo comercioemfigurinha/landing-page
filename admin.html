@@ -49,6 +49,10 @@
   .pill{display:inline-block;background:var(--cream);color:var(--orange);font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
   .pill.pago{background:#e5f7ee;color:#1a8a4a}
   .pill.recusado,.pill.reembolsado{background:#fdeaea;color:#c62828}
+  .pill.etapa1{background:#fdeaea;color:#c62828}
+  .pill.etapa2{background:#fff3d9;color:#a1710a}
+  .pill.etapa3{background:#e8f0fe;color:#1a56b0}
+  .filters-label{width:100%;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
   .pill.pendente{background:#fff3d9;color:#a1710a}
   .frases{font-size:12.5px;color:var(--muted);white-space:pre-wrap;background:var(--cream);border-radius:12px;padding:10px 12px;max-height:120px;overflow:auto}
   .status-select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:700 13px Inter;color:var(--ink);background:#fff}
@@ -98,6 +102,8 @@ const grid=document.querySelector('#grid'),status_=document.querySelector('#stat
 const filtersBox=document.querySelector('#filters');
 let TODOS_REGISTROS=[];
 let FILTRO_ATUAL='Todos';
+let FILTRO_ETAPA='Todas';
+const ETAPA_OPCOES=['Etapa 1 · Dados','Etapa 2 · Estilo','Etapa 3 · Checkout'];
 const STATUS_OPCOES=['A pagar','Pago','Em aprovação','Concluído','Recusado','Reembolsado'];
 
 function scriptUrl(){
@@ -132,18 +138,32 @@ async function carregar(senha){
 }
 
 function renderFiltros(){
-  const contagem={};
-  TODOS_REGISTROS.forEach(r=>{const s=r.StatusServico||'A pagar';contagem[s]=(contagem[s]||0)+1});
+  const contagem={},contEtapa={};
+  TODOS_REGISTROS.forEach(r=>{
+    const s=r.StatusServico||'A pagar';contagem[s]=(contagem[s]||0)+1;
+    const e=r.Etapa||ETAPA_OPCOES[2];contEtapa[e]=(contEtapa[e]||0)+1;
+  });
+  const etapas=['Todas',...ETAPA_OPCOES];
   const grupos=['Todos',...STATUS_OPCOES];
-  filtersBox.innerHTML=grupos.map(g=>{
-    const n=g==='Todos'?TODOS_REGISTROS.length:(contagem[g]||0);
-    return `<button data-filtro="${g}" class="${g===FILTRO_ATUAL?'active':''}">${g} (${n})</button>`;
-  }).join('');
-  filtersBox.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{FILTRO_ATUAL=b.dataset.filtro;renderFiltros();render()}));
+  filtersBox.innerHTML=
+    '<span class="filters-label">Até onde chegou no formulário</span>'+
+    etapas.map(g=>{
+      const n=g==='Todas'?TODOS_REGISTROS.length:(contEtapa[g]||0);
+      return `<button data-etapa="${g}" class="${g===FILTRO_ETAPA?'active':''}">${g} (${n})</button>`;
+    }).join('')+
+    '<span class="filters-label">Status do serviço</span>'+
+    grupos.map(g=>{
+      const n=g==='Todos'?TODOS_REGISTROS.length:(contagem[g]||0);
+      return `<button data-filtro="${g}" class="${g===FILTRO_ATUAL?'active':''}">${g} (${n})</button>`;
+    }).join('');
+  filtersBox.querySelectorAll('button[data-filtro]').forEach(b=>b.addEventListener('click',()=>{FILTRO_ATUAL=b.dataset.filtro;renderFiltros();render()}));
+  filtersBox.querySelectorAll('button[data-etapa]').forEach(b=>b.addEventListener('click',()=>{FILTRO_ETAPA=b.dataset.etapa;renderFiltros();render()}));
 }
 
 function render(){
-  const registros=FILTRO_ATUAL==='Todos'?TODOS_REGISTROS:TODOS_REGISTROS.filter(r=>(r.StatusServico||'A pagar')===FILTRO_ATUAL);
+  const registros=TODOS_REGISTROS
+    .filter(r=>FILTRO_ATUAL==='Todos'||(r.StatusServico||'A pagar')===FILTRO_ATUAL)
+    .filter(r=>FILTRO_ETAPA==='Todas'||(r.Etapa||ETAPA_OPCOES[2])===FILTRO_ETAPA);
   status_.textContent=registros.length+' de '+TODOS_REGISTROS.length+' cadastro(s).';
   if(!registros.length){grid.innerHTML='<div class="empty">Nenhum cadastro nesse filtro.</div>';return}
   grid.innerHTML=registros.map(r=>{
@@ -158,7 +178,8 @@ function render(){
         ${img}
         <div><h3>${escapeHtml(r.Comercio||'Sem nome')}</h3><small>${escapeHtml(r.Nome||'')} · ${escapeHtml(r.Data||'')}</small></div>
       </div>
-      <div class="row"><span>Estilo</span><b>${escapeHtml(r.Estilo||'')}</b></div>
+      <div class="row"><span>Etapa do formulário</span><span class="pill etapa${(r.Etapa||ETAPA_OPCOES[2]).match(/\d/)[0]}">${escapeHtml(r.Etapa||ETAPA_OPCOES[2])}</span></div>
+      <div class="row"><span>Estilo</span><b>${escapeHtml(r.Estilo||'—')}</b></div>
       <div class="row"><span>Valor</span><span class="pill">${escapeHtml(r.Valor||'')}</span></div>
       <div class="row"><span>Pagamento</span><span class="pill ${pagCls}">${escapeHtml(r.StatusPagamento||'pendente')}${r.FormaPagamento?' · '+escapeHtml(r.FormaPagamento):''}</span></div>
       <div class="row"><span>WhatsApp</span><b>${escapeHtml(r.WhatsApp||'')}</b></div>
