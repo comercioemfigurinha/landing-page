@@ -8,23 +8,40 @@ let current = 0;
 
 // UserId único desta visita: nasce na etapa 1 e é reaproveitado até o checkout,
 // assim a mesma linha da planilha vai sendo atualizada (sem duplicar).
+// Fica no sessionStorage pra sobreviver a um refresh sem gerar um lead novo.
 let userId = null;
+try { userId = sessionStorage.getItem('cef_user_id'); } catch {}
+function getUserId() {
+  if (!userId) {
+    userId = CEF.gerarUserId();
+    try { sessionStorage.setItem('cef_user_id', userId); } catch {}
+  }
+  return userId;
+}
+
+// Fila: cada envio só começa quando o anterior terminou. Assim a etapa 1 sempre
+// chega antes da 2 (e da 3) e o servidor encontra a linha criada, em vez de duplicar.
+let filaEnvio = Promise.resolve();
+function enfileirar(fn) {
+  const p = filaEnvio.then(fn, fn);
+  filaEnvio = p.catch(() => {});
+  return p;
+}
 
 // Registra no admin até onde a pessoa chegou (etapa 1, 2 ou 3).
 // Não bloqueia a navegação: se falhar, o formulário segue normalmente.
 function salvarEtapa(etapa) {
   const cfg = window.SHEETS_CONFIG || {};
   if (!cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_')) return;
-  if (!userId) userId = CEF.gerarUserId();
   const fd = new FormData();
   fd.append('acao', 'criar_lead');
   fd.append('Etapa', String(etapa));
-  fd.append('UserId', userId);
+  fd.append('UserId', getUserId());
   fd.append('Nome', form.Nome.value);
   fd.append('Comercio', form.Comercio.value);
   fd.append('WhatsApp', form.WhatsApp.value);
   fd.append('Estilo', estiloField.value);
-  try { fetch(cfg.scriptUrl, { method: 'POST', body: fd, keepalive: true }).catch(() => {}); } catch {}
+  enfileirar(() => fetch(cfg.scriptUrl, { method: 'POST', body: fd }).catch(() => {}));
 }
 
 function showStep() {
@@ -183,7 +200,7 @@ form.addEventListener('submit', async e => {
   const missing = !cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_');
   if (missing) { alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.'); return; }
 
-  if (!userId) userId = CEF.gerarUserId();
+  getUserId();
   const nome = form.Nome.value, comercio = form.Comercio.value, whatsappVal = form.WhatsApp.value, estilo = estiloField.value;
 
   CEF.showLoading([
@@ -202,6 +219,7 @@ form.addEventListener('submit', async e => {
     fd.append('WhatsApp', whatsappVal);
     fd.append('Estilo', estilo);
 
+    await filaEnvio; // garante que as etapas 1 e 2 já foram gravadas
     const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({ ok: res.ok }));
     if (!data.ok) throw new Error(data.error || 'Falha ao registrar o pedido.');
