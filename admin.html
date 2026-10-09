@@ -65,6 +65,23 @@
   .edit-fields input,.edit-fields textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:13px Inter;margin-top:3px}
   .edit-fields textarea{grid-column:span 2;min-height:80px}
   .edit-fields .save-row{grid-column:span 2;display:flex;gap:8px;margin-top:4px}
+
+  .modal{position:fixed;inset:0;background:rgba(40,16,6,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto;z-index:20}
+  .modal.open{display:flex}
+  .modal-card{background:#fff;border-radius:22px;padding:26px;width:100%;max-width:520px;box-shadow:0 24px 60px rgba(40,16,6,.3);margin:auto}
+  .modal-card h2{font-size:22px;margin-bottom:4px}
+  .modal-card .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid label{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+  .form-grid label.full{grid-column:span 2}
+  .form-grid input,.form-grid select,.form-grid textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:500 14px Inter;color:var(--ink);margin-top:4px;background:#fff;outline:none;text-transform:none;letter-spacing:0}
+  .form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,105,0,.1)}
+  .form-grid textarea{min-height:90px;resize:vertical}
+  .form-error{color:#c62828;font-size:13px;min-height:18px;margin:12px 0 0}
+  .modal-actions{display:flex;gap:10px;margin-top:12px}
+  .modal-actions button{flex:1}
+  .modal-actions button:disabled{opacity:.6;cursor:wait;transform:none}
+  @media(max-width:520px){.form-grid{grid-template-columns:1fr}.form-grid label.full{grid-column:span 1}}
 </style>
 </head>
 <body>
@@ -83,6 +100,7 @@
   <header>
     <h1>Comércio em Figurinha — <b>Painel</b></h1>
     <div class="actions">
+      <button class="btn-primary" id="novoBtn">+ Novo cadastro</button>
       <button class="btn-ghost" id="refreshBtn">↻ Atualizar</button>
       <button class="btn-ghost" id="sairBtn">Sair</button>
     </div>
@@ -92,6 +110,42 @@
     <div class="filters" id="filters"></div>
     <div class="grid" id="grid"></div>
   </main>
+</div>
+
+<div class="modal" id="novoModal" role="dialog" aria-modal="true" aria-labelledby="novoTitulo">
+  <div class="modal-card">
+    <h2 id="novoTitulo">Novo cadastro manual</h2>
+    <p class="sub">Para clientes que não passaram pelo site. Preencha pelo menos o nome ou o comércio.</p>
+    <div class="form-grid">
+      <label>Nome<input id="novoNome" autocomplete="off"></label>
+      <label>Comércio<input id="novoComercio" autocomplete="off"></label>
+      <label>WhatsApp<input id="novoWhats" inputmode="tel" placeholder="(18) 99999-9999"></label>
+      <label>Estilo
+        <select id="novoEstilo">
+          <option value="Logo">Logo</option>
+          <option value="Mascote">Mascote</option>
+        </select>
+      </label>
+      <label>Pagamento
+        <select id="novoPagamento">
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+        </select>
+      </label>
+      <label>Forma de pagamento<input id="novoForma" placeholder="Ex.: Pix, dinheiro"></label>
+      <label>Valor<input id="novoValor" placeholder="R$ 47,00"></label>
+      <label>Status do serviço
+        <select id="novoStatusServico"></select>
+      </label>
+      <label class="full">Frases<textarea id="novoFrases"></textarea></label>
+      <label class="full">Logo / foto (opcional)<input type="file" id="novoLogo" accept="image/*"></label>
+    </div>
+    <div class="form-error" id="novoErro"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="novoSalvar">Salvar cadastro</button>
+      <button class="btn-ghost" id="novoCancelar">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <script src="js/sheets-config.js"></script>
@@ -207,6 +261,12 @@ function render(){
             <option value="Mascote" ${r.Estilo==='Mascote'?'selected':''}>Mascote</option>
           </select>
         </label>
+        <label>Pagamento
+          <select data-field="StatusPagamento">
+            ${['pendente','pago','recusado','reembolsado'].map(v=>`<option value="${v}" ${(r.StatusPagamento||'pendente')===v?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </label>
+        <label>Forma de pagamento<input data-field="FormaPagamento" value="${escapeAttr(r.FormaPagamento||'')}"></label>
         <label>Frases<textarea data-field="Frases">${escapeHtml(r.Frases||'')}</textarea></label>
         <div class="save-row">
           <button class="btn-primary" data-action="salvar" style="flex:1">Salvar</button>
@@ -284,6 +344,81 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 function escapeAttr(str){ return escapeHtml(str); }
+
+// ---------- Cadastro manual ----------
+const novoModal=document.querySelector('#novoModal'),novoErro=document.querySelector('#novoErro');
+const novoSalvar=document.querySelector('#novoSalvar');
+const novoCampos=['#novoNome','#novoComercio','#novoWhats','#novoForma','#novoValor','#novoFrases','#novoLogo'];
+document.querySelector('#novoStatusServico').innerHTML=STATUS_OPCOES.map(s=>`<option value="${s}">${s}</option>`).join('');
+
+function abrirNovo(){
+  novoCampos.forEach(id=>document.querySelector(id).value='');
+  document.querySelector('#novoEstilo').value='Logo';
+  document.querySelector('#novoPagamento').value='pendente';
+  document.querySelector('#novoStatusServico').value='A pagar';
+  novoErro.textContent='';
+  novoSalvar.disabled=false;novoSalvar.textContent='Salvar cadastro';
+  novoModal.classList.add('open');
+  document.querySelector('#novoNome').focus();
+}
+function fecharNovo(){novoModal.classList.remove('open')}
+
+function arquivoParaBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result).split(',')[1]);
+    r.onerror=()=>reject(new Error('Falha ao ler a imagem.'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function salvarNovo(){
+  const url=scriptUrl(); if(!url) return;
+  const v=id=>document.querySelector(id).value.trim();
+  if(!v('#novoNome')&&!v('#novoComercio')){novoErro.textContent='Preencha pelo menos o nome ou o comércio.';return}
+  novoErro.textContent='';
+  novoSalvar.disabled=true;novoSalvar.textContent='Salvando...';
+  try{
+    const fd=new FormData();
+    fd.append('acao','admin_criar');
+    fd.append('senha',senhaAtual());
+    fd.append('Nome',v('#novoNome'));
+    fd.append('Comercio',v('#novoComercio'));
+    fd.append('WhatsApp',v('#novoWhats'));
+    fd.append('Estilo',document.querySelector('#novoEstilo').value);
+    fd.append('StatusPagamento',document.querySelector('#novoPagamento').value);
+    fd.append('FormaPagamento',v('#novoForma'));
+    fd.append('Valor',v('#novoValor'));
+    fd.append('StatusServico',document.querySelector('#novoStatusServico').value);
+    fd.append('Frases',document.querySelector('#novoFrases').value);
+    const logo=document.querySelector('#novoLogo').files[0];
+    if(logo){
+      fd.append('LogoBase64',await arquivoParaBase64(logo));
+      fd.append('LogoName',logo.name);
+      fd.append('LogoType',logo.type||'image/png');
+    }
+    const res=await fetch(url,{method:'POST',body:fd});
+    const data=await res.json();
+    if(!data.ok){
+      novoErro.textContent=data.error==='senha_invalida'?'Sessão expirada. Saia e entre de novo.':'Não foi possível salvar: '+(data.error||'erro desconhecido');
+      novoSalvar.disabled=false;novoSalvar.textContent='Salvar cadastro';
+      return;
+    }
+    fecharNovo();
+    FILTRO_ATUAL='Todos';FILTRO_ETAPA='Todas';
+    carregar(senhaAtual());
+  }catch(err){
+    console.error(err);
+    novoErro.textContent='Não foi possível salvar agora. Tente novamente.';
+    novoSalvar.disabled=false;novoSalvar.textContent='Salvar cadastro';
+  }
+}
+
+document.querySelector('#novoBtn').addEventListener('click',abrirNovo);
+document.querySelector('#novoCancelar').addEventListener('click',fecharNovo);
+novoSalvar.addEventListener('click',salvarNovo);
+novoModal.addEventListener('click',e=>{if(e.target===novoModal)fecharNovo()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&novoModal.classList.contains('open'))fecharNovo()});
 
 document.querySelector('#entrarBtn').addEventListener('click',()=>carregar(senhaInput.value.trim()));
 senhaInput.addEventListener('keydown',e=>{if(e.key==='Enter')carregar(senhaInput.value.trim())});
