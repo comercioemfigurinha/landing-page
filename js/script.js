@@ -5,43 +5,57 @@ const progressFill = document.querySelector('#progressFill'), stepLabel = docume
 const whatsapp = document.querySelector('#whatsapp');
 const estiloField = document.querySelector('#estiloField');
 let current = 0;
+const temaAtual = new URLSearchParams(location.search).get('tema') || '';
+const temaField = document.querySelector('#temaField');
+temaField.value = temaAtual;
+const temaInfo = document.querySelector('#temaInfo');
+const nomeTema = temaAtual ? temaAtual.replace(/[-_]/g, ' ') : 'seu nicho';
+temaInfo.textContent = `Escolhendo figurinhas para: ${nomeTema}`;
+estiloField.value = 'Pronto';
 
+const nicheInput = document.querySelector('#nichoEscolhido'), modelInput = document.querySelector('#modeloEscolhido');
+const availableNiches = ['confeitaria','pizzaria','hamburgueria','lanchonete','barbearia','salao-de-beleza'];
+let chosenNiche = temaAtual || 'confeitaria';
+let chosenModel = '';
+const saved = (() => {try{return JSON.parse(sessionStorage.getItem('cefPedido')||'{}')}catch{return {}}})();
+if(saved.nicho) chosenNiche=saved.nicho;
+if(saved.modelo && saved.modelo.startsWith(chosenNiche+'-')) chosenModel=saved.modelo;
+function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenModel;sessionStorage.setItem('cefPedido',JSON.stringify({temaAnuncio:temaAtual,nicho:chosenNiche,modelo:chosenModel,plano:estiloField.value}));}
+function renderModels(){
+  persistChoice();
+  temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
+  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.jpg`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
+  document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
+  document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>{document.querySelector('#lightboxImg').src=b.dataset.path;document.querySelector('#imageLightbox').hidden=false});
+}
+document.querySelector('#closeLightbox').onclick=()=>document.querySelector('#imageLightbox').hidden=true;
+document.querySelector('#imageLightbox').onclick=e=>{if(e.target.id==='imageLightbox')e.currentTarget.hidden=true};
+function updateChoice(){const basic=estiloField.value==='Pronto';document.querySelector('#basicPicker').hidden=!basic;document.querySelector('#customPreview').hidden=basic;document.querySelector('#choiceHeading').textContent=basic?'Escolha seu pacote de 9 figurinhas':'Como ficaria sua personagem?';document.querySelector('#choiceDesc').textContent=basic?'Escolha 1 dos 3 modelos. Toque em ampliar para ver os detalhes.':'Veja a transformação da foto em figurinha personalizada.';persistChoice();}
+renderModels();
+if(saved.plano==='Personalizado'){document.querySelector('#personalizadoCard input').checked=true;estiloField.value='Personalizado';document.querySelector('#prontoCard').classList.remove('selected');document.querySelector('#personalizadoCard').classList.add('selected');}
+updateChoice();
 // UserId único desta visita: nasce na etapa 1 e é reaproveitado até o checkout,
 // assim a mesma linha da planilha vai sendo atualizada (sem duplicar).
-// Fica no sessionStorage pra sobreviver a um refresh sem gerar um lead novo.
 let userId = null;
-try { userId = sessionStorage.getItem('cef_user_id'); } catch {}
-function getUserId() {
-  if (!userId) {
-    userId = CEF.gerarUserId();
-    try { sessionStorage.setItem('cef_user_id', userId); } catch {}
-  }
-  return userId;
-}
-
-// Fila: cada envio só começa quando o anterior terminou. Assim a etapa 1 sempre
-// chega antes da 2 (e da 3) e o servidor encontra a linha criada, em vez de duplicar.
-let filaEnvio = Promise.resolve();
-function enfileirar(fn) {
-  const p = filaEnvio.then(fn, fn);
-  filaEnvio = p.catch(() => {});
-  return p;
-}
 
 // Registra no admin até onde a pessoa chegou (etapa 1, 2 ou 3).
 // Não bloqueia a navegação: se falhar, o formulário segue normalmente.
 function salvarEtapa(etapa) {
   const cfg = window.SHEETS_CONFIG || {};
   if (!cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_')) return;
+  if (!userId) userId = CEF.gerarUserId();
   const fd = new FormData();
   fd.append('acao', 'criar_lead');
   fd.append('Etapa', String(etapa));
-  fd.append('UserId', getUserId());
+  fd.append('UserId', userId);
   fd.append('Nome', form.Nome.value);
   fd.append('Comercio', form.Comercio.value);
   fd.append('WhatsApp', form.WhatsApp.value);
   fd.append('Estilo', estiloField.value);
-  enfileirar(() => fetch(cfg.scriptUrl, { method: 'POST', body: fd }).catch(() => {}));
+  fd.append('Tema', temaAtual);
+  fd.append('NichoEscolhido', chosenNiche);
+  fd.append('ModeloEscolhido', chosenModel);
+  try { fetch(cfg.scriptUrl, { method: 'POST', body: fd, keepalive: true }).catch(() => {}); } catch {}
 }
 
 function showStep() {
@@ -91,9 +105,10 @@ function goTo(n, flip) {
 
 nextBtn.addEventListener('click', () => {
   if (!validStep()) return;
-  if (current === 0) { CEF.setProgress({ dados: true }); salvarEtapa(1); }
+  if (current === 0) { CEF.setProgress({ estilo: true }); salvarEtapa(1); }
   if (current === 1) {
-    CEF.setProgress({ estilo: true });
+    if(estiloField.value==='Pronto' && !chosenModel){alert('Escolha um dos 3 modelos antes de continuar.');return;}
+    CEF.setProgress({ dados: true });
     salvarEtapa(2);
     // Meta Pixel: evento padrão "Adicionar à lista de desejos" (AddToWishlist), disparado ao clicar
     // em "Continuar" na etapa 2 (escolha do estilo). Usado como sinal de pré-cadastro.
@@ -112,95 +127,125 @@ whatsapp.addEventListener('input', e => {
   e.target.value = v;
 });
 
-// ---- Escolha de estilo ----
-document.querySelectorAll('.style-card input').forEach(input => {
+// ---- Escolha do pacote ----
+document.querySelectorAll('.offer-card input').forEach(input => {
   input.addEventListener('change', () => {
-    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
-    input.closest('.style-card').classList.add('selected');
+    document.querySelectorAll('.offer-card').forEach(c => c.classList.remove('selected'));
+    input.closest('.offer-card').classList.add('selected');
     estiloField.value = input.value;
+    updateChoice();
+    document.querySelector('#customIntro').hidden = input.value !== 'Personalizado';
+    document.querySelectorAll('.offer-card').forEach(c => {
+      c.querySelector('.offer-choice').textContent = c.classList.contains('selected') ? 'Selecionado ✓' : 'Escolher este pacote →';
+    });
   });
 });
 
-// ---- Exemplos (carrossel clicável) ----
-const examplesStrip = document.querySelector('#examplesStrip');
-const examplesToggle = document.querySelector('#examplesToggle');
-const exTrack = document.querySelector('#exTrack');
-const exSlides = [...exTrack.children];
-const exDots = document.querySelector('#exDots');
-const exPrev = document.querySelector('#exPrev');
-const exNext = document.querySelector('#exNext');
-
-function setExamples(open) {
-  examplesStrip.classList.toggle('open', open);
-  examplesToggle.textContent = open ? 'Ver menos exemplos' : 'Clique para ver exemplos';
-  if (open) exTrack.scrollTo({ left: 0 });
-}
-examplesToggle.addEventListener('click', () => setExamples(!examplesStrip.classList.contains('open')));
-
-function goToSlide(i) {
-  const s = exSlides[Math.max(0, Math.min(i, exSlides.length - 1))];
-  exTrack.scrollTo({ left: s.offsetLeft - (exTrack.clientWidth - s.offsetWidth) / 2, behavior: 'smooth' });
-}
-function currentSlide() {
-  const centro = exTrack.scrollLeft + exTrack.clientWidth / 2;
-  let idx = 0, menor = Infinity;
-  exSlides.forEach((s, i) => {
-    const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - centro);
-    if (d < menor) { menor = d; idx = i; }
+// Flip individual dos cards: o verso reutiliza os mesmos modelos e escolhas da etapa 2.
+const cardsFlip = [...document.querySelectorAll('.offer-card')];
+cardsFlip.forEach(card => {
+  const front = document.createElement('div'); front.className = 'offer-front';
+  // O input radio permanece no label, e os elementos visuais passam para a frente.
+  [...card.children].filter(node => node.tagName !== 'INPUT').forEach(node => front.appendChild(node));
+  card.appendChild(front);
+  const back = document.createElement('div'); back.className = 'offer-back';
+  back.setAttribute('aria-hidden','true');
+  card.appendChild(back);
+  card.querySelector('.offer-examples').addEventListener('click', e => {
+    e.preventDefault(); e.stopPropagation();
+    const input = card.querySelector('input'); input.checked = true;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    cardsFlip.forEach(other=>{if(other!==card)closeCard(other)});
+    if(card.classList.contains('is-flipped')) closeCard(card);
+    else {renderCardBack(card);card.classList.add('is-flipped');back.setAttribute('aria-hidden','false')}
   });
-  return idx;
-}
-function updateCarousel() {
-  const idx = currentSlide();
-  [...exDots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
-  exPrev.disabled = idx === 0;
-  exNext.disabled = idx === exSlides.length - 1;
-}
-exSlides.forEach((_, i) => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.setAttribute('aria-label', `Ir para o exemplo ${i + 1}`);
-  b.addEventListener('click', () => goToSlide(i));
-  exDots.appendChild(b);
+  // Interações dentro do verso não devem ativar o label automaticamente.
+  back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation()});
 });
-exPrev.addEventListener('click', () => goToSlide(currentSlide() - 1));
-exNext.addEventListener('click', () => goToSlide(currentSlide() + 1));
-exTrack.addEventListener('scroll', () => requestAnimationFrame(updateCarousel), { passive: true });
-updateCarousel();
-
-// Clique no exemplo: seleciona o estilo, recolhe os exemplos e leva o olho até o "Continuar"
-exTrack.addEventListener('click', e => {
-  const hit = e.target.closest('.ex-hit');
-  if (!hit) return;
-  const radio = document.querySelector(`input[name="estiloRadio"][value="${hit.dataset.estilo}"]`);
-  if (!radio) return;
-  radio.checked = true;
-  radio.dispatchEvent(new Event('change', { bubbles: true })); // reaproveita o handler que marca o card e preenche o estiloField
-  setExamples(false);
-  // setTimeout(() => nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 380);
-});
+function closeCard(card){card.classList.remove('is-flipped');card.querySelector('.offer-back').setAttribute('aria-hidden','true')}
+function renderCardBack(card){
+  const back = card.querySelector('.offer-back');
+  const basic = card.id==='prontoCard';
+  back.innerHTML = `<div class="offer-back-head"><strong>${basic?'Escolha seu modelo':'Veja a transformação'}</strong><button type="button" class="offer-back-close"><i class="fa-solid fa-reply"></i></button></div>`;
+  back.querySelector('.offer-back-close').onclick=()=>closeCard(card);
+  const slides = basic ? [1,2,3].map(n => ({
+    label:`Modelo ${String(n).padStart(2,'0')}`,
+    id:`${chosenNiche}-${String(n).padStart(2,'0')}`,
+    image:`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.jpg`
+  })) : [1,2,3].map(n=>({
+    label:`Transformação ${n}`,
+    photo:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-foto.jpg`,
+    sticker:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-mascote.jpg`
+  }));
+  const note=document.createElement('div');note.className='offer-back-note';
+  note.textContent=basic?'Nicho: '+chosenNiche.replaceAll('-',' '):'3 exemplos: foto original em cima e figurinha criada embaixo.';
+  back.appendChild(note);
+  const carousel=document.createElement('div');carousel.className='flip-carousel';back.appendChild(carousel);
+  const track=document.createElement('div');track.className='flip-carousel-track';carousel.appendChild(track);
+  let active=basic?Math.max(0,slides.findIndex(x=>x.id===chosenModel)):0;
+  if(active<0)active=0;
+  slides.forEach((slide,i)=>{
+    const item=document.createElement('button');item.type='button';item.className='flip-slide';
+    item.innerHTML=basic?`<img src="${slide.image}" alt="${slide.label}" loading="lazy"><span>${slide.label}</span>`:`<div class="premium-pair"><div><img src="${slide.photo}" alt="Foto original ${i+1}" loading="lazy"><small>Foto original</small></div><div><img src="${slide.sticker}" alt="Figurinha criada ${i+1}" loading="lazy"><small>Figurinha criada</small></div></div><span>${slide.label}</span>`;
+    item.querySelectorAll('img').forEach(img=>img.addEventListener('error',e=>{e.target.style.opacity='.2'}));
+    item.addEventListener('click',()=>{if(i!==active){activate(i);return;}if(basic){chosenModel=slide.id;renderModels();activate(i)}else{activate(i)}});
+    track.appendChild(item);
+  });
+  const controls=document.createElement('div');controls.className='flip-carousel-controls';
+  controls.innerHTML='<button type="button" class="flip-prev" aria-label="Exemplo anterior">‹</button><span class="flip-count"></span><button type="button" class="flip-next" aria-label="Próximo exemplo">›</button>';
+  if(!basic){controls.querySelector('.flip-prev').classList.add('premium-flat-arrow');controls.querySelector('.flip-next').classList.add('premium-flat-arrow');controls.querySelector('.flip-prev').innerHTML='&#8592;';controls.querySelector('.flip-next').innerHTML='&#8594;';}
+  back.appendChild(controls);
+  const select=document.createElement('button');select.type='button';select.className='offer-back-select';select.textContent='Selecionar plano →';
+  function activate(index){
+    active=(index+slides.length)%slides.length;
+    [...track.children].forEach((el,i)=>{el.classList.toggle('active',i===active);el.classList.toggle('before',i===(active+slides.length-1)%slides.length);el.classList.toggle('after',i===(active+1)%slides.length);el.setAttribute('aria-label',slides[i].label+(basic&&chosenModel===slides[i].id?' selecionado':''));});
+    controls.querySelector('.flip-count').textContent=`${active+1} / ${slides.length}`;
+    if(basic){chosenModel=slides[active].id;renderModels();select.disabled=false;}
+  }
+  controls.querySelector('.flip-prev').onclick=()=>activate(active-1);
+  controls.querySelector('.flip-next').onclick=()=>activate(active+1);
+  let touchStart=0;
+  carousel.addEventListener('touchstart',e=>{touchStart=e.changedTouches[0].clientX},{passive:true});
+  carousel.addEventListener('touchend',e=>{const diff=e.changedTouches[0].clientX-touchStart;if(Math.abs(diff)>35)activate(active+(diff<0?1:-1))},{passive:true});
+  carousel.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();activate(active+1)}if(e.key==='ArrowLeft'){e.preventDefault();activate(active-1)}});
+  if(basic){
+    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>{document.querySelector('#lightboxImg').src=slides[active].image;document.querySelector('#imageLightbox').hidden=false};back.appendChild(zoom);
+  }
+  if(!basic){const more=document.createElement('button');more.type='button';more.className='flip-other';more.textContent='Ver mais exemplos →';more.onclick=()=>activate(active+1);back.appendChild(more)}
+  activate(active);
+  select.disabled=basic&&!chosenModel;
+  select.onclick=()=>{
+    const input=card.querySelector('input');input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}));
+    closeCard(card);
+    CEF.setProgress({estilo:true,dados:true});salvarEtapa(1);salvarEtapa(2);
+    goTo(2,true);
+  };
+  back.appendChild(select);
+}
 
 // ---- FAQ ----
 document.querySelectorAll('.faq-item').forEach(item => {
   item.querySelector('.faq-q').addEventListener('click', () => item.classList.toggle('open'));
 });
 
-function review() {
-  const estiloTxt = estiloField.value === 'Mascote' ? 'com mascote' : 'só a logo';
-  document.querySelector('#summaryLine').textContent = `${form.Comercio.value} · ${estiloTxt} · R$ 47,00`;
-  // Só agora o checklist aparece: nome/telefone e estilo já riscados.
-  CEF.renderTracker(document.querySelector('#trackerBox'), ['dados', 'estilo']);
-}
+function review(){document.querySelector('#summaryLine').textContent=estiloField.value==='Pronto'?`Pacote pronto • ${chosenNiche} • ${chosenModel} • R$ 14,50`:'Pacote personalizado • 9 figurinhas + mascote + foto de perfil • R$ 39,40';}
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  if (estiloField.value==='Pronto' && !chosenModel){alert('Selecione um modelo.');goTo(1,false);return;}
   if (!form.checkValidity()) { form.reportValidity(); return; }
 
   const cfg = window.SHEETS_CONFIG || {};
   const missing = !cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_');
   if (missing) { alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.'); return; }
 
-  getUserId();
+  // Não usar o checkout antigo de R$ 47 para ofertas com preços diferentes.
+  const checkout = estiloField.value === 'Pronto' ? cfg.kiwifyCheckoutProntoUrl : cfg.kiwifyCheckoutPersonalizadoUrl;
+  if (!checkout || !/^https:\/\//.test(checkout)) {
+    alert('Este pacote ainda não tem um link de pagamento configurado. Entre em contato com o suporte para concluir a compra.');
+    return;
+  }
+  if (!userId) userId = CEF.gerarUserId();
   const nome = form.Nome.value, comercio = form.Comercio.value, whatsappVal = form.WhatsApp.value, estilo = estiloField.value;
 
   CEF.showLoading([
@@ -218,18 +263,20 @@ form.addEventListener('submit', async e => {
     fd.append('Comercio', comercio);
     fd.append('WhatsApp', whatsappVal);
     fd.append('Estilo', estilo);
+    fd.append('Tema', temaAtual);
+  fd.append('NichoEscolhido', chosenNiche);
+  fd.append('ModeloEscolhido', chosenModel);
 
-    await filaEnvio; // garante que as etapas 1 e 2 já foram gravadas
     const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({ ok: res.ok }));
     if (!data.ok) throw new Error(data.error || 'Falha ao registrar o pedido.');
 
-    CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo });
+    CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo, tema: temaAtual, nicho: chosenNiche, modelo: chosenModel });
     CEF.setProgress({ dados: true, estilo: true });
 
     const numeroLimpo = whatsappVal.replace(/\D/g, '');
     const params = new URLSearchParams({ name: nome, phone: numeroLimpo, s1: userId });
-    window.location.href = `${cfg.kiwifyCheckoutUrl}?${params.toString()}`;
+    window.location.href = `${checkout}${checkout.includes('?') ? "&" : "?"}${params.toString()}`;
   } catch (err) {
     console.error(err);
     CEF.hideLoading();

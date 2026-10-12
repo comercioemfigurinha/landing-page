@@ -1,0 +1,6 @@
+Para o plano personalizado, insira 6 imagens em assets/personalizados/:
+exemplo-01-foto.webp e exemplo-01-figurinha.webp
+exemplo-02-foto.webp e exemplo-02-figurinha.webp
+exemplo-03-foto.webp e exemplo-03-figurinha.webp
+Cada par aparece lado a lado no mesmo slide; use swipe, setas ou Ver mais exemplos.
+O pacote basico permanece com seu carrossel original.

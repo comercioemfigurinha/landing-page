@@ -41,9 +41,9 @@
 
     <!-- Formulário de logo + frases -->
     <form class="post-form" id="postForm" hidden>
-      <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Envie sua logo (ou foto) e as frases</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma agora — dá pra ajustar de novo na hora da aprovação.</p></div>
+      <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Envie sua foto ou referência de mascote e suas frases</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma agora — dá pra ajustar de novo na hora da aprovação.</p></div>
       <div class="compact-fields">
-        <label class="upload-box"><span>Envie a logo ou uma foto de perfil do seu comércio *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+        <label class="upload-box"><span>Envie uma foto sua ou uma imagem de referência para o mascote *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
       </div>
       <div class="phrases-list" id="phrasesList" style="margin-top:22px"></div>
       <input type="hidden" name="Frases" id="frasesField">
@@ -95,8 +95,15 @@ function iniciarFormulario(lead) {
   CEF.setProgress({ dados: true, estilo: true, pagamento: true });
   CEF.renderTracker(document.querySelector('#trackerBox'));
   lookupBox.hidden = true;
-  postForm.hidden = false;
-  montarFrases();
+  if (lead.estilo === 'Pronto') {
+    postForm.hidden = true;
+    finalCard.hidden = false;
+    finalCard.querySelector('h2').textContent = 'Seu pedido foi recebido!';
+    finalCard.querySelector('ul').innerHTML = '<li>✅ <span>Você escolheu 1 pacote pronto com 9 figurinhas.</span></li><li>📦 <span>Em até <b>12 horas</b> entraremos em contato no WhatsApp para enviar o pacote organizado com orientações de instalação.</span></li>';
+  } else {
+    postForm.hidden = false;
+    montarFrases();
+  }
 }
 
 document.querySelector('#lookupBtn').addEventListener('click', async () => {

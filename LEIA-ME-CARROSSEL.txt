@@ -1,0 +1,8 @@
+CARROSSEL DOS PLANOS
+
+Básico: assets/pacotes/{nicho}/modelo-01.webp, modelo-02.webp, modelo-03.webp
+Personalizado: assets/personalizados/exemplo-01.webp, exemplo-02.webp, exemplo-03.webp
+
+Para o personalizado, cada imagem 1:1 deve conter a foto da dona e a figurinha lado a lado.
+Swipe horizontal, setas e toque nos exemplos laterais navegam entre os 3 exemplos.
+No básico, o exemplo central é o modelo escolhido e segue registrado no pedido.

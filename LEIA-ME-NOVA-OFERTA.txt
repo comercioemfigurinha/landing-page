@@ -1,0 +1,12 @@
+NOVA OFERTA — Comércio em Figurinha
+
+1. Cadastre DOIS produtos na Kiwify: pronto (R$ 14,50) e personalizado (R$ 39,40).
+2. Em js/sheets-config.js, preencha kiwifyCheckoutProntoUrl e kiwifyCheckoutPersonalizadoUrl.
+   O checkout antigo de R$ 47,00 foi mantido somente como referência e NÃO é utilizado.
+3. Publique os arquivos e teste a navegação com ?tema=confeitaria ou ?tema=pizzaria.
+4. O parâmetro tema segue controlando as cores e o texto do anúncio e é enviado junto ao lead.
+5. Atenção: para salvar o campo Tema em coluna própria, adapte o Google Apps Script e a planilha.
+   Sem essa alteração, o tema é guardado no navegador, mas o servidor pode ignorar o campo.
+6. O pacote pronto não solicita upload/frases na página de sucesso; o personalizado solicita.
+7. Verifique e ajuste o regulamento antigo para refletir os novos preços, escopos e prazos antes de publicar.
+8. Atenção: checkouts, pixel, Apps Script, emails e automações não foram testados em produção.

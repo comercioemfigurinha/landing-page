@@ -9,6 +9,11 @@ window.SHEETS_CONFIG = {
   // Link de checkout do produto na Kiwify (sem parâmetros — eles são adicionados pelo script)
   kiwifyCheckoutUrl: 'https://pay.kiwify.com.br/CISp2zn',
 
+  // Cadastre os links reais de checkout para os DOIS novos produtos.
+  // O link antigo acima cobra R$ 47,00 e não é usado pela nova página.
+  kiwifyCheckoutProntoUrl: '', // produto de R$ 14,50
+  kiwifyCheckoutPersonalizadoUrl: '', // produto de R$ 39,40
+
   // WhatsApp da equipe, exibido na tela de "obrigado" para dar segurança ao cliente
   whatsappSuporte: 'https://wa.me/+5518996961409',
 };

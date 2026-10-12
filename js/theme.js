@@ -43,7 +43,7 @@ footer{background:color-mix(in srgb,var(--ink) 75%,#000)}footer p{color:var(--so
 .upload-box{background:var(--cream);border-color:var(--line)}.review-card div{background:var(--cream)}
 #cefLoading{background:color-mix(in srgb,var(--ink) 55%,transparent)}`;
   function T(sel,x){var e=document.querySelector(sel);if(e&&x)e.textContent=x}
-  T('.hero .eyebrow',o.eyebrow);T('.hero-copy > p',o.subtitulo);T('.hero .btn.primary',o.btn_hero);T('.top-cta',o.btn_topo);T('.builder-intro h2',o.titulo_form);
+  T('.hero .eyebrow',o.eyebrow);T('.hero-copy > p',o.subtitulo);T('.hero .btn.primary',o.btn_hero);T('.top-cta',o.btn_topo);/* Título da escolha de pacotes é fixo em todos os nichos. */
   if(o.titulo){var h=document.querySelector('.hero h1');if(h)h.innerHTML=esc(o.titulo).replace(/\*(.+?)\*/g,'<span>$1</span>')}
   var n=document.querySelector('input[name=Nome]'),c=document.querySelector('input[name=Comercio]');
   if(n&&o.ph_nome)n.placeholder=o.ph_nome;if(c&&o.ph_comercio)c.placeholder=o.ph_comercio;

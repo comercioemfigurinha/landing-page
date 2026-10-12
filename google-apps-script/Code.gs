@@ -24,8 +24,20 @@ const LOG_SHEET_NAME = 'WebhookLogs';
 const COLUNAS = [
   'Data', 'UserId', 'Nome', 'Comercio', 'WhatsApp', 'Estilo',
   'StatusPagamento', 'FormaPagamento', 'DataPagamento', 'Valor',
-  'Frases', 'LogoUrl', 'LogoFileId', 'StatusServico'
+  'Frases', 'LogoUrl', 'LogoFileId', 'StatusServico', 'Etapa'
 ];
+
+// Etapas do formulário do site. O número serve para nunca "regredir" a etapa
+// (as requisições da etapa 1 e 2 podem chegar fora de ordem).
+const ETAPAS = {
+  1: 'Etapa 1 · Dados',
+  2: 'Etapa 2 · Estilo',
+  3: 'Etapa 3 · Checkout'
+};
+function ranqueEtapa_(txt) {
+  const n = Object.keys(ETAPAS).find(k => ETAPAS[k] === txt);
+  return n ? Number(n) : 0;
+}
 
 const VALOR_PADRAO = 'R$ 47,00';
 const STATUS_SERVICO_PADRAO = 'A pagar';
@@ -63,12 +75,27 @@ function doPost(e) {
 }
 
 /**
- * 1) Cria a linha "pendente" assim que a pessoa termina o mini-formulário no site,
- * antes de ir pro checkout da Kiwify.
+ * 1) Cria ou atualiza o lead conforme a pessoa avança no formulário do site.
+ *    - Etapa 1 (nome, comércio, whatsapp) e etapa 2 (estilo) chegam aqui mesmo sem pagamento.
+ *    - Etapa 3 (vai pro checkout) usa o MESMO UserId, então atualiza a linha em vez de duplicar.
+ *    Campos vazios não sobrescrevem o que já está salvo; a etapa nunca regride.
  */
 function criarLead_(p) {
   const sheet = getOrCreateSheet_();
   const userId = p.UserId || ('usr_' + Utilities.getUuid().replace(/-/g, '').slice(0, 12));
+  const etapaNum = Number(p.Etapa) || 3; // sem Etapa informada = comportamento antigo (checkout)
+  const etapaTxt = ETAPAS[etapaNum] || ETAPAS[3];
+  const col = nome => COLUNAS.indexOf(nome) + 1;
+
+  const linha = encontrarLinhaPorUserId_(sheet, userId);
+  if (linha) {
+    ['Nome', 'Comercio', 'WhatsApp', 'Estilo'].forEach(campo => {
+      if (p[campo]) sheet.getRange(linha, col(campo)).setValue(p[campo]);
+    });
+    const atual = sheet.getRange(linha, col('Etapa')).getValue();
+    if (etapaNum > ranqueEtapa_(atual)) sheet.getRange(linha, col('Etapa')).setValue(etapaTxt);
+    return jsonOutput_({ ok: true, userId });
+  }
 
   sheet.appendRow([
     new Date(),
@@ -84,7 +111,8 @@ function criarLead_(p) {
     '',              // Frases (vem depois)
     '',              // LogoUrl (vem depois)
     '',              // LogoFileId (vem depois)
-    STATUS_SERVICO_PADRAO
+    STATUS_SERVICO_PADRAO,
+    etapaTxt         // Etapa
   ]);
 
   return jsonOutput_({ ok: true, userId });
@@ -229,6 +257,7 @@ function doGet(e) {
       const obj = {};
       header.forEach((h, i) => { obj[h] = row[i]; });
       obj.Data = obj.Data ? new Date(obj.Data).toLocaleString('pt-BR') : '';
+      if (!obj.Etapa) obj.Etapa = ETAPAS[3]; // cadastros anteriores a este recurso já tinham chegado ao checkout
       obj.DataPagamento = obj.DataPagamento ? new Date(obj.DataPagamento).toLocaleString('pt-BR') : '';
       return obj;
     })
@@ -307,6 +336,12 @@ function getOrCreateSheet_() {
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
     sheet.appendRow(COLUNAS);
+  } else {
+    // Planilha já existente: acrescenta no fim as colunas novas (ex.: "Etapa") sem mexer nas antigas.
+    const header = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+    COLUNAS.forEach((nome, i) => {
+      if (header.indexOf(nome) === -1) sheet.getRange(1, i + 1).setValue(nome);
+    });
   }
   return sheet;
 }
