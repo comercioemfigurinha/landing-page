@@ -4,6 +4,9 @@ const nextBtn = document.querySelector('#nextBtn'), backBtn = document.querySele
 const progressFill = document.querySelector('#progressFill'), stepLabel = document.querySelector('#stepLabel');
 const whatsapp = document.querySelector('#whatsapp');
 const estiloField = document.querySelector('#estiloField');
+const comercioField = document.querySelector('#comercioField');
+const comercioInput = form.Comercio;
+const contactHelp = document.querySelector('#contactHelp');
 let current = 0;
 const temaAtual = new URLSearchParams(location.search).get('tema') || '';
 const temaField = document.querySelector('#temaField');
@@ -14,11 +17,11 @@ temaInfo.textContent = `Escolhendo figurinhas para: ${nomeTema}`;
 estiloField.value = 'Pronto';
 
 const nicheInput = document.querySelector('#nichoEscolhido'), modelInput = document.querySelector('#modeloEscolhido');
-const availableNiches = ['confeitaria','pizzaria','hamburgueria','lanchonete','barbearia','salao-de-beleza'];
-let chosenNiche = temaAtual || 'confeitaria';
+const availableNiches = ['confeitaria'];
+let chosenNiche = 'confeitaria';
 let chosenModel = '';
 const saved = (() => {try{return JSON.parse(sessionStorage.getItem('cefPedido')||'{}')}catch{return {}}})();
-if(saved.nicho) chosenNiche=saved.nicho;
+if(saved.nicho && availableNiches.includes(saved.nicho)) chosenNiche=saved.nicho;
 if(saved.modelo && saved.modelo.startsWith(chosenNiche+'-')) chosenModel=saved.modelo;
 function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenModel;sessionStorage.setItem('cefPedido',JSON.stringify({temaAnuncio:temaAtual,nicho:chosenNiche,modelo:chosenModel,plano:estiloField.value}));}
 function renderModels(){
@@ -30,7 +33,17 @@ function renderModels(){
 }
 document.querySelector('#closeLightbox').onclick=()=>document.querySelector('#imageLightbox').hidden=true;
 document.querySelector('#imageLightbox').onclick=e=>{if(e.target.id==='imageLightbox')e.currentTarget.hidden=true};
-function updateChoice(){const basic=estiloField.value==='Pronto';document.querySelector('#basicPicker').hidden=!basic;document.querySelector('#customPreview').hidden=basic;document.querySelector('#choiceHeading').textContent=basic?'Escolha seu pacote de 9 figurinhas':'Como ficaria sua personagem?';document.querySelector('#choiceDesc').textContent=basic?'Escolha 1 dos 3 modelos. Toque em ampliar para ver os detalhes.':'Veja a transformação da foto em figurinha personalizada.';persistChoice();}
+function isBasic(){return estiloField.value === 'Pronto';}
+function updateContactFields(){
+  const basic = isBasic();
+  comercioField.hidden = basic;
+  comercioInput.required = !basic;
+  if (basic) comercioInput.value = '';
+  contactHelp.textContent = basic
+    ? 'Para o plano básico, precisamos apenas do seu nome e WhatsApp para identificar a compra.'
+    : 'Para personalizar corretamente, precisamos também do nome do seu comércio ou marca.';
+}
+function updateChoice(){const basic=isBasic();document.querySelector('#basicPicker').hidden=!basic;document.querySelector('#customPreview').hidden=basic;document.querySelector('#choiceHeading').textContent=basic?'Escolha seu pacote de 9 figurinhas':'Como ficaria sua personagem?';document.querySelector('#choiceDesc').textContent=basic?'Escolha 1 dos 3 modelos. Toque em ampliar para ver os detalhes.':'Veja a transformação da foto em figurinha personalizada. As informações da sua marca serão coletadas após o pagamento.';updateContactFields();persistChoice();}
 renderModels();
 if(saved.plano==='Personalizado'){document.querySelector('#personalizadoCard input').checked=true;estiloField.value='Personalizado';document.querySelector('#prontoCard').classList.remove('selected');document.querySelector('#personalizadoCard').classList.add('selected');}
 updateChoice();
@@ -52,6 +65,8 @@ function salvarEtapa(etapa) {
   fd.append('Comercio', form.Comercio.value);
   fd.append('WhatsApp', form.WhatsApp.value);
   fd.append('Estilo', estiloField.value);
+  fd.append('Plano', estiloField.value === 'Pronto' ? 'Básico' : 'Personalizado');
+  fd.append('Valor', estiloField.value === 'Pronto' ? 'R$ 14,50' : 'R$ 39,40');
   fd.append('Tema', temaAtual);
   fd.append('NichoEscolhido', chosenNiche);
   fd.append('ModeloEscolhido', chosenModel);
@@ -228,11 +243,16 @@ document.querySelectorAll('.faq-item').forEach(item => {
   item.querySelector('.faq-q').addEventListener('click', () => item.classList.toggle('open'));
 });
 
-function review(){document.querySelector('#summaryLine').textContent=estiloField.value==='Pronto'?`Pacote pronto • ${chosenNiche} • ${chosenModel} • R$ 14,50`:'Pacote personalizado • 9 figurinhas + mascote + foto de perfil • R$ 39,40';}
+function review(){
+  updateContactFields();
+  document.querySelector('#summaryLine').textContent=isBasic()
+    ? `Plano básico • ${chosenNiche} • ${chosenModel || 'modelo a escolher'} • R$ 14,50`
+    : 'Plano personalizado • 9 figurinhas + mascote + foto de perfil • R$ 39,40';
+}
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
-  if (estiloField.value==='Pronto' && !chosenModel){alert('Selecione um modelo.');goTo(1,false);return;}
+  if (isBasic() && !chosenModel){alert('Selecione um modelo.');goTo(1,false);return;}
   if (!form.checkValidity()) { form.reportValidity(); return; }
 
   const cfg = window.SHEETS_CONFIG || {};
@@ -240,7 +260,7 @@ form.addEventListener('submit', async e => {
   if (missing) { alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.'); return; }
 
   // Não usar o checkout antigo de R$ 47 para ofertas com preços diferentes.
-  const checkout = estiloField.value === 'Pronto' ? cfg.kiwifyCheckoutProntoUrl : cfg.kiwifyCheckoutPersonalizadoUrl;
+  const checkout = isBasic() ? cfg.kiwifyCheckoutProntoUrl : cfg.kiwifyCheckoutPersonalizadoUrl;
   if (!checkout || !/^https:\/\//.test(checkout)) {
     alert('Este pacote ainda não tem um link de pagamento configurado. Entre em contato com o suporte para concluir a compra.');
     return;
@@ -263,15 +283,17 @@ form.addEventListener('submit', async e => {
     fd.append('Comercio', comercio);
     fd.append('WhatsApp', whatsappVal);
     fd.append('Estilo', estilo);
+    fd.append('Plano', isBasic() ? 'Básico' : 'Personalizado');
+    fd.append('Valor', isBasic() ? 'R$ 14,50' : 'R$ 39,40');
     fd.append('Tema', temaAtual);
-  fd.append('NichoEscolhido', chosenNiche);
-  fd.append('ModeloEscolhido', chosenModel);
+    fd.append('NichoEscolhido', chosenNiche);
+    fd.append('ModeloEscolhido', chosenModel);
 
     const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({ ok: res.ok }));
     if (!data.ok) throw new Error(data.error || 'Falha ao registrar o pedido.');
 
-    CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo, tema: temaAtual, nicho: chosenNiche, modelo: chosenModel });
+    CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo, plano: isBasic() ? 'Básico' : 'Personalizado', valor: isBasic() ? 'R$ 14,50' : 'R$ 39,40', tema: temaAtual, nicho: chosenNiche, modelo: chosenModel });
     CEF.setProgress({ dados: true, estilo: true });
 
     const numeroLimpo = whatsappVal.replace(/\D/g, '');

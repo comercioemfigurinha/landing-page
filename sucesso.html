@@ -16,6 +16,21 @@
   .success-header img{width:130px}
   .success-header h1{font-size:clamp(28px,5vw,38px);margin:14px 0 6px}
   .success-header p{color:var(--muted);margin:0}
+  .success-header h1 .celebration{color:var(--orange)}
+  .basic-package{max-width:360px;margin:18px auto 6px;border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}
+  .basic-package img{width:100%;border-radius:12px;background:#f3f4f6;object-fit:contain}
+  .basic-package strong,.basic-package small{display:block}
+  .basic-package strong{margin-top:10px}
+  .basic-package small{color:var(--muted);margin-top:4px}
+  .radio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .radio-grid label{border:1px solid var(--line);border-radius:14px;padding:12px;font-weight:800;cursor:pointer;background:#fff}
+  .radio-grid input{margin-right:7px}
+  .post-form textarea,.post-form select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px 15px;font:inherit;background:#fff}
+  .post-form textarea{min-height:96px;resize:vertical}
+  .second-color[hidden]{display:none}
+  .soft-contact{font-size:13px;color:var(--muted);margin-top:18px}
+  .soft-contact a{color:#128c7e;font-weight:800;text-decoration:underline}
+  @media(max-width:560px){.radio-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -23,7 +38,7 @@
   <div class="success-wrap">
     <div class="success-header">
       <img src="assets/logo.png" alt="Comércio em Figurinha">
-      <h1>Pagamento confirmado! 🎉</h1>
+      <h1>Pagamento confirmado! <span class="celebration">✓</span></h1>
       <p>Falta só um passo para colocarmos suas figurinhas em produção.</p>
     </div>
 
@@ -39,12 +54,33 @@
       <p class="form-note" id="lookupError" style="color:#c62828"></p>
     </div>
 
-    <!-- Formulário de logo + frases -->
+    <!-- Formulário do plano personalizado -->
     <form class="post-form" id="postForm" hidden>
-      <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Envie sua foto ou referência de mascote e suas frases</h3><p>Já deixamos 9 sugestões prontas. Pode seguir assim ou editar qualquer uma agora — dá pra ajustar de novo na hora da aprovação.</p></div>
+      <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Conte como sua marca deve aparecer</h3><p>Com essas informações montamos a amostra completa do pacote personalizado para aprovação.</p></div>
       <div class="compact-fields">
-        <label class="upload-box"><span>Envie uma foto sua ou uma imagem de referência para o mascote *</span><input required type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>📎 Escolher imagem</strong><small id="fileName">PNG, JPG ou WEBP</small></label>
+        <label class="upload-box"><span>Envie uma foto sua para a criação do mascote *</span><input required type="file" name="Foto" id="fotoUpload" accept="image/png,image/jpeg,image/webp"><strong>Escolher foto</strong><small id="fotoName">PNG, JPG ou WEBP</small></label>
+        <label class="upload-box"><span>Envie sua logo, se tiver</span><input type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>Escolher logo</strong><small id="logoName">Opcional</small></label>
+        <label><span>Qual estilo de texto mais combina com sua marca? *</span>
+          <select required name="EstiloTexto" id="estiloTexto">
+            <option value="">Selecione</option>
+            <option>Elegante</option>
+            <option>Básica (mas com personalidade)</option>
+            <option>Escrita a mão</option>
+            <option>Escrita fluida</option>
+          </select>
+        </label>
+        <label><span>Qual cor define sua marca? *</span><input required type="text" name="CorPrincipal" id="corPrincipal" placeholder="Ex.: rosa, dourado, azul..."></label>
+        <div>
+          <span style="display:block;font-size:13px;font-weight:800;margin-bottom:8px">Tem uma segunda cor?</span>
+          <div class="radio-grid">
+            <label><input type="radio" name="TemSegundaCor" value="Sim">Sim</label>
+            <label><input type="radio" name="TemSegundaCor" value="Não" checked>Não</label>
+          </div>
+        </div>
+        <label class="second-color" id="segundaCorWrap" hidden><span>Qual é a segunda cor?</span><input type="text" name="SegundaCor" id="segundaCor" placeholder="Ex.: branco, preto, lilás..."></label>
+        <label><span>Observações</span><textarea name="Observacoes" id="observacoes" placeholder="Conte detalhes importantes: estilo da marca, preferências, o que evitar..."></textarea></label>
       </div>
+      <div class="step-copy" style="margin-top:26px;margin-bottom:16px"><span>FRASES</span><h3>Revise as 9 sugestões</h3><p>Você pode usar como estão ou editar qualquer frase.</p></div>
       <div class="phrases-list" id="phrasesList" style="margin-top:22px"></div>
       <input type="hidden" name="Frases" id="frasesField">
       <button class="submit" type="submit" style="margin-top:22px">Enviar e finalizar <span>→</span></button>
@@ -55,6 +91,7 @@
     <div class="final-card" id="finalCard" hidden>
       <div class="big-check">✓</div>
       <h2>Recebemos tudo, obrigado!</h2>
+      <div id="basicPackageBox" class="basic-package" hidden></div>
       <ul>
         <li>✅ <span><b>Nossa equipe já está com o serviço em produção.</b></span></li>
         <li>📦 <span>Em até <b>2 dias úteis</b> será enviado o material completo para aprovação pelo seu WhatsApp cadastrado.</span></li>
@@ -75,8 +112,13 @@
 const lookupBox = document.querySelector('#lookupBox');
 const postForm = document.querySelector('#postForm');
 const finalCard = document.querySelector('#finalCard');
-const fileInput = document.querySelector('#logoUpload');
-const fileName = document.querySelector('#fileName');
+const fotoInput = document.querySelector('#fotoUpload');
+const logoInput = document.querySelector('#logoUpload');
+const fotoName = document.querySelector('#fotoName');
+const logoName = document.querySelector('#logoName');
+const segundaCorWrap = document.querySelector('#segundaCorWrap');
+const segundaCor = document.querySelector('#segundaCor');
+const basicPackageBox = document.querySelector('#basicPackageBox');
 const defaults = ['Muito Obrigado.','Já vamos te atender.','PIX recebido!','Só um momento...','Pedido recebido!','Volte sempre!','Boa noite!','Saiu para entrega!','Obrigado pela preferência.'];
 
 document.querySelector('#whatsSupportLink').href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
@@ -88,7 +130,25 @@ function syncPhrases() {
   document.querySelector('#frasesField').value = [...document.querySelectorAll('.phrase-row input')].map((x,i)=>`${i+1} - ${x.value}`).join('\n');
 }
 
-fileInput?.addEventListener('change', () => fileName.textContent = fileInput.files[0]?.name || 'PNG, JPG ou WEBP');
+fotoInput?.addEventListener('change', () => fotoName.textContent = fotoInput.files[0]?.name || 'PNG, JPG ou WEBP');
+logoInput?.addEventListener('change', () => logoName.textContent = logoInput.files[0]?.name || 'Opcional');
+document.querySelectorAll('input[name="TemSegundaCor"]').forEach(input => {
+  input.addEventListener('change', () => {
+    const sim = document.querySelector('input[name="TemSegundaCor"]:checked')?.value === 'Sim';
+    segundaCorWrap.hidden = !sim;
+    segundaCor.required = sim;
+    if (!sim) segundaCor.value = '';
+  });
+});
+
+function nomeModelo(modelo) {
+  const m = String(modelo || '').match(/-(\d{2})$/);
+  return m ? `Modelo ${m[1]}` : 'Modelo escolhido';
+}
+function mostrarContatoSuave() {
+  const href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
+  return `<p class="soft-contact">Se precisar falar conosco, o WhatsApp fica aqui: <a href="${href}" target="_blank" rel="noopener">abrir conversa</a>.</p>`;
+}
 
 function iniciarFormulario(lead) {
   CEF.setLead(lead);
@@ -99,8 +159,16 @@ function iniciarFormulario(lead) {
     postForm.hidden = true;
     finalCard.hidden = false;
     finalCard.querySelector('h2').textContent = 'Seu pedido foi recebido!';
-    finalCard.querySelector('ul').innerHTML = '<li>✅ <span>Você escolheu 1 pacote pronto com 9 figurinhas.</span></li><li>📦 <span>Em até <b>12 horas</b> entraremos em contato no WhatsApp para enviar o pacote organizado com orientações de instalação.</span></li>';
+    const nicho = lead.nicho || lead.NichoEscolhido || 'confeitaria';
+    const modelo = lead.modelo || lead.ModeloEscolhido || '';
+    const modeloNumero = String(modelo).match(/-(\d{2})$/)?.[1] || '01';
+    basicPackageBox.hidden = false;
+    basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.jpg" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
+    finalCard.querySelector('ul').innerHTML = '<li>✅ <span>Você escolheu 1 pacote pronto com 9 figurinhas.</span></li><li>📦 <span>Em até <b>12 horas</b> entraremos em contato no WhatsApp para enviar o pacote organizado e com instruções fáceis de instalação.</span></li>';
+    finalCard.querySelector('.whats-support').insertAdjacentHTML('afterend', mostrarContatoSuave());
+    finalCard.querySelector('.whats-support').style.display = 'none';
   } else {
+    basicPackageBox.hidden = true;
     postForm.hidden = false;
     montarFrases();
   }
@@ -118,7 +186,15 @@ document.querySelector('#lookupBtn').addEventListener('click', async () => {
     const data = await res.json();
     CEF.hideLoading();
     if (!data.ok) { erro.textContent = 'Não encontramos nenhum pedido com esse WhatsApp. Confira o número ou fale com a gente no suporte.'; return; }
-    iniciarFormulario({ userId: data.pedido.UserId, nome: data.pedido.Nome, comercio: data.pedido.Comercio, estilo: data.pedido.Estilo });
+    iniciarFormulario({
+      userId: data.pedido.UserId,
+      nome: data.pedido.Nome,
+      comercio: data.pedido.Comercio,
+      estilo: data.pedido.Estilo,
+      plano: data.pedido.Plano,
+      nicho: data.pedido.NichoEscolhido,
+      modelo: data.pedido.ModeloEscolhido
+    });
   } catch (err) {
     CEF.hideLoading();
     erro.textContent = 'Não foi possível buscar agora. Tente novamente.';
@@ -140,12 +216,23 @@ postForm.addEventListener('submit', async e => {
   ]);
 
   try {
-    const logo = fileInput.files[0];
+    const foto = fotoInput.files[0];
+    const logo = logoInput.files[0];
     const fd = new FormData();
     fd.append('acao', 'finalizar');
     fd.append('UserId', lead.userId);
     fd.append('Comercio', lead.comercio || '');
     fd.append('Frases', document.querySelector('#frasesField').value);
+    fd.append('EstiloTexto', document.querySelector('#estiloTexto').value);
+    fd.append('CorPrincipal', document.querySelector('#corPrincipal').value);
+    fd.append('TemSegundaCor', document.querySelector('input[name="TemSegundaCor"]:checked')?.value || 'Não');
+    fd.append('SegundaCor', document.querySelector('#segundaCor').value);
+    fd.append('Observacoes', document.querySelector('#observacoes').value);
+    if (foto) {
+      fd.append('FotoBase64', await CEF.fileToBase64(foto));
+      fd.append('FotoName', foto.name);
+      fd.append('FotoType', foto.type || 'image/png');
+    }
     if (logo) {
       fd.append('LogoBase64', await CEF.fileToBase64(logo));
       fd.append('LogoName', logo.name);
@@ -160,6 +247,8 @@ postForm.addEventListener('submit', async e => {
     CEF.hideLoading();
     postForm.hidden = true;
     finalCard.hidden = false;
+    finalCard.querySelector('h2').textContent = 'Recebemos suas informações!';
+    finalCard.querySelector('ul').innerHTML = '<li>✅ <span><b>Agora vamos montar a amostra completa do seu pacote personalizado.</b></span></li><li>📦 <span>Em até <b>2 dias úteis</b> entraremos em contato pelo WhatsApp para enviar a amostra completa para aprovação.</span></li><li>🎉 <span>Após sua aprovação, enviaremos o pacote completo de forma organizada e com instalação fácil.</span></li>';
   } catch (err) {
     console.error(err);
     CEF.hideLoading();

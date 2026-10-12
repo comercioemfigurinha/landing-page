@@ -103,7 +103,7 @@ const filtersBox=document.querySelector('#filters');
 let TODOS_REGISTROS=[];
 let FILTRO_ATUAL='Todos';
 let FILTRO_ETAPA='Todas';
-const ETAPA_OPCOES=['Etapa 1 · Dados','Etapa 2 · Estilo','Etapa 3 · Checkout'];
+const ETAPA_OPCOES=['Etapa 1 · Plano','Etapa 2 · Modelo','Etapa 3 · Checkout'];
 const STATUS_OPCOES=['A pagar','Pago','Em aprovação','Concluído','Recusado','Reembolsado'];
 
 function scriptUrl(){
@@ -169,17 +169,27 @@ function render(){
   grid.innerHTML=registros.map(r=>{
     const digits=(r.WhatsApp||'').replace(/\D/g,'');
     const wa=digits?`https://wa.me/55${digits}`:'#';
-    const img=r.LogoUrl
-      ?`<img src="${r.LogoUrl}" alt="Logo ${r.Comercio||''}" loading="lazy">`
+    const img=(r.FotoUrl||r.LogoUrl)
+      ?`<img src="${r.FotoUrl||r.LogoUrl}" alt="Imagem ${r.Comercio||r.Nome||''}" loading="lazy">`
       :`<div class="noimg">🖼️</div>`;
     const pagCls=(r.StatusPagamento||'').toLowerCase();
+    const titulo=r.Comercio||r.Nome||'Sem nome';
+    const plano=r.Plano||((r.Estilo==='Pronto')?'Básico':(r.Estilo==='Personalizado'?'Personalizado':''));
+    const modelo=[r.NichoEscolhido,r.ModeloEscolhido].filter(Boolean).join(' · ');
+    const detalhesPersonalizado=[
+      r.EstiloTexto&&`Texto: ${r.EstiloTexto}`,
+      r.CorPrincipal&&`Cor: ${r.CorPrincipal}`,
+      r.TemSegundaCor&&`Segunda cor: ${r.TemSegundaCor}${r.SegundaCor?' · '+r.SegundaCor:''}`,
+      r.Observacoes&&`Obs.: ${r.Observacoes}`
+    ].filter(Boolean).join('\n');
     return `<div class="card" data-userid="${r.UserId}">
       <div class="card-top">
         ${img}
-        <div><h3>${escapeHtml(r.Comercio||'Sem nome')}</h3><small>${escapeHtml(r.Nome||'')} · ${escapeHtml(r.Data||'')}</small></div>
+        <div><h3>${escapeHtml(titulo)}</h3><small>${escapeHtml(r.Nome||'')} · ${escapeHtml(r.Data||'')}</small></div>
       </div>
       <div class="row"><span>Etapa do formulário</span><span class="pill etapa${(r.Etapa||ETAPA_OPCOES[2]).match(/\d/)[0]}">${escapeHtml(r.Etapa||ETAPA_OPCOES[2])}</span></div>
-      <div class="row"><span>Estilo</span><b>${escapeHtml(r.Estilo||'—')}</b></div>
+      <div class="row"><span>Plano</span><b>${escapeHtml(plano||r.Estilo||'—')}</b></div>
+      ${modelo?`<div class="row"><span>Pacote escolhido</span><b>${escapeHtml(modelo)}</b></div>`:''}
       <div class="row"><span>Valor</span><span class="pill">${escapeHtml(r.Valor||'')}</span></div>
       <div class="row"><span>Pagamento</span><span class="pill ${pagCls}">${escapeHtml(r.StatusPagamento||'pendente')}${r.FormaPagamento?' · '+escapeHtml(r.FormaPagamento):''}</span></div>
       <div class="row"><span>WhatsApp</span><b>${escapeHtml(r.WhatsApp||'')}</b></div>
@@ -189,9 +199,11 @@ function render(){
           ${STATUS_OPCOES.map(s=>`<option value="${s}" ${s===(r.StatusServico||'A pagar')?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
+      ${detalhesPersonalizado?`<div class="frases">${escapeHtml(detalhesPersonalizado)}</div>`:''}
       ${r.Frases?`<div class="frases">${escapeHtml(r.Frases)}</div>`:''}
       <div class="card-links">
         <a class="whats" href="${wa}" target="_blank" rel="noopener">Abrir WhatsApp</a>
+        ${r.FotoFileId?`<a href="https://drive.google.com/file/d/${r.FotoFileId}/view" target="_blank" rel="noopener">Ver foto</a>`:''}
         ${r.LogoFileId?`<a href="https://drive.google.com/file/d/${r.LogoFileId}/view" target="_blank" rel="noopener">Ver logo</a>`:''}
         <button data-action="link-pagamento">Copiar link de pagamento</button>
         <button data-action="editar">Editar</button>
@@ -203,10 +215,16 @@ function render(){
         <label>WhatsApp<input data-field="WhatsApp" value="${escapeAttr(r.WhatsApp||'')}"></label>
         <label>Estilo
           <select data-field="Estilo">
-            <option value="Logo" ${r.Estilo==='Logo'?'selected':''}>Logo</option>
-            <option value="Mascote" ${r.Estilo==='Mascote'?'selected':''}>Mascote</option>
+            <option value="Pronto" ${r.Estilo==='Pronto'?'selected':''}>Pronto</option>
+            <option value="Personalizado" ${r.Estilo==='Personalizado'?'selected':''}>Personalizado</option>
           </select>
         </label>
+        <label>Nicho<input data-field="NichoEscolhido" value="${escapeAttr(r.NichoEscolhido||'')}"></label>
+        <label>Modelo<input data-field="ModeloEscolhido" value="${escapeAttr(r.ModeloEscolhido||'')}"></label>
+        <label>Estilo do texto<input data-field="EstiloTexto" value="${escapeAttr(r.EstiloTexto||'')}"></label>
+        <label>Cor principal<input data-field="CorPrincipal" value="${escapeAttr(r.CorPrincipal||'')}"></label>
+        <label>Segunda cor<input data-field="SegundaCor" value="${escapeAttr(r.SegundaCor||'')}"></label>
+        <label>Observações<textarea data-field="Observacoes">${escapeHtml(r.Observacoes||'')}</textarea></label>
         <label>Frases<textarea data-field="Frases">${escapeHtml(r.Frases||'')}</textarea></label>
         <div class="save-row">
           <button class="btn-primary" data-action="salvar" style="flex:1">Salvar</button>
@@ -234,10 +252,11 @@ function render(){
 
 function copiarLinkPagamento(registro,botao){
   const cfg=window.SHEETS_CONFIG||{};
-  if(!cfg.kiwifyCheckoutUrl){alert('Configure kiwifyCheckoutUrl em js/sheets-config.js.');return}
+  const checkout=registro.Estilo==='Pronto'?cfg.kiwifyCheckoutProntoUrl:(cfg.kiwifyCheckoutPersonalizadoUrl||cfg.kiwifyCheckoutUrl);
+  if(!checkout){alert('Configure o link de checkout em js/sheets-config.js.');return}
   const digits=(registro.WhatsApp||'').replace(/\D/g,'');
   const params=new URLSearchParams({name:registro.Nome||'',phone:digits,s1:registro.UserId||''});
-  const link=`${cfg.kiwifyCheckoutUrl}?${params.toString()}`;
+  const link=`${checkout}${checkout.includes('?')?'&':'?'}${params.toString()}`;
   const marcarCopiado=()=>{const t=botao.textContent;botao.textContent='Link copiado!';setTimeout(()=>botao.textContent=t,1800)};
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(link).then(marcarCopiado).catch(()=>prompt('Copie o link:',link));

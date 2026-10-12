@@ -11,8 +11,8 @@ window.SHEETS_CONFIG = {
 
   // Cadastre os links reais de checkout para os DOIS novos produtos.
   // O link antigo acima cobra R$ 47,00 e não é usado pela nova página.
-  kiwifyCheckoutProntoUrl: '', // produto de R$ 14,50
-  kiwifyCheckoutPersonalizadoUrl: '', // produto de R$ 39,40
+  kiwifyCheckoutProntoUrl: 'https://pay.kiwify.com.br/z5eraPe', // produto de R$ 14,50
+  kiwifyCheckoutPersonalizadoUrl: 'https://pay.kiwify.com.br/CISp2zn', // produto de R$ 39,40
 
   // WhatsApp da equipe, exibido na tela de "obrigado" para dar segurança ao cliente
   whatsappSuporte: 'https://wa.me/+5518996961409',

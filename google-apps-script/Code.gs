@@ -24,14 +24,17 @@ const LOG_SHEET_NAME = 'WebhookLogs';
 const COLUNAS = [
   'Data', 'UserId', 'Nome', 'Comercio', 'WhatsApp', 'Estilo',
   'StatusPagamento', 'FormaPagamento', 'DataPagamento', 'Valor',
-  'Frases', 'LogoUrl', 'LogoFileId', 'StatusServico', 'Etapa'
+  'Frases', 'LogoUrl', 'LogoFileId', 'StatusServico', 'Etapa',
+  'Plano', 'Tema', 'NichoEscolhido', 'ModeloEscolhido',
+  'FotoUrl', 'FotoFileId', 'EstiloTexto', 'CorPrincipal',
+  'TemSegundaCor', 'SegundaCor', 'Observacoes'
 ];
 
 // Etapas do formulário do site. O número serve para nunca "regredir" a etapa
 // (as requisições da etapa 1 e 2 podem chegar fora de ordem).
 const ETAPAS = {
-  1: 'Etapa 1 · Dados',
-  2: 'Etapa 2 · Estilo',
+  1: 'Etapa 1 · Plano',
+  2: 'Etapa 2 · Modelo',
   3: 'Etapa 3 · Checkout'
 };
 function ranqueEtapa_(txt) {
@@ -39,7 +42,7 @@ function ranqueEtapa_(txt) {
   return n ? Number(n) : 0;
 }
 
-const VALOR_PADRAO = 'R$ 47,00';
+const VALOR_PADRAO = '';
 const STATUS_SERVICO_PADRAO = 'A pagar';
 
 /**
@@ -89,7 +92,7 @@ function criarLead_(p) {
 
   const linha = encontrarLinhaPorUserId_(sheet, userId);
   if (linha) {
-    ['Nome', 'Comercio', 'WhatsApp', 'Estilo'].forEach(campo => {
+    ['Nome', 'Comercio', 'WhatsApp', 'Estilo', 'Plano', 'Valor', 'Tema', 'NichoEscolhido', 'ModeloEscolhido'].forEach(campo => {
       if (p[campo]) sheet.getRange(linha, col(campo)).setValue(p[campo]);
     });
     const atual = sheet.getRange(linha, col('Etapa')).getValue();
@@ -107,12 +110,23 @@ function criarLead_(p) {
     'pendente',      // StatusPagamento
     '',              // FormaPagamento
     '',              // DataPagamento
-    VALOR_PADRAO,
+    p.Valor || VALOR_PADRAO,
     '',              // Frases (vem depois)
     '',              // LogoUrl (vem depois)
     '',              // LogoFileId (vem depois)
     STATUS_SERVICO_PADRAO,
-    etapaTxt         // Etapa
+    etapaTxt,        // Etapa
+    p.Plano || (p.Estilo === 'Pronto' ? 'Básico' : (p.Estilo === 'Personalizado' ? 'Personalizado' : '')),
+    p.Tema || '',
+    p.NichoEscolhido || '',
+    p.ModeloEscolhido || '',
+    '',              // FotoUrl
+    '',              // FotoFileId
+    '',              // EstiloTexto
+    '',              // CorPrincipal
+    '',              // TemSegundaCor
+    '',              // SegundaCor
+    ''               // Observacoes
   ]);
 
   return jsonOutput_({ ok: true, userId });
@@ -128,22 +142,30 @@ function finalizarPedido_(p) {
 
   const col = nome => COLUNAS.indexOf(nome) + 1;
 
-  if (p.LogoBase64) {
-    const folder = DriveApp.getFolderById(FOLDER_ID);
-    const bytes = Utilities.base64Decode(p.LogoBase64);
-    const nomeArquivo = (p.Comercio || p.UserId || 'logo') + ' - ' + (p.LogoName || 'logo.png');
-    const blob = Utilities.newBlob(bytes, p.LogoType || 'image/png', nomeArquivo);
-    const file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    const logoFileId = file.getId();
-    const logoUrl = 'https://drive.google.com/thumbnail?id=' + logoFileId + '&sz=w800';
-    sheet.getRange(linha, col('LogoUrl')).setValue(logoUrl);
-    sheet.getRange(linha, col('LogoFileId')).setValue(logoFileId);
-  }
+  if (p.FotoBase64) salvarArquivoPedido_(sheet, linha, col, {
+    base64: p.FotoBase64,
+    nome: p.FotoName || 'foto.png',
+    tipo: p.FotoType || 'image/png',
+    prefixo: p.Comercio || p.UserId || 'foto',
+    urlCol: 'FotoUrl',
+    idCol: 'FotoFileId'
+  });
+
+  if (p.LogoBase64) salvarArquivoPedido_(sheet, linha, col, {
+    base64: p.LogoBase64,
+    nome: p.LogoName || 'logo.png',
+    tipo: p.LogoType || 'image/png',
+    prefixo: p.Comercio || p.UserId || 'logo',
+    urlCol: 'LogoUrl',
+    idCol: 'LogoFileId'
+  });
 
   if (p.Frases) {
     sheet.getRange(linha, col('Frases')).setValue(p.Frases);
   }
+  ['EstiloTexto', 'CorPrincipal', 'TemSegundaCor', 'SegundaCor', 'Observacoes'].forEach(campo => {
+    if (Object.prototype.hasOwnProperty.call(p, campo)) sheet.getRange(linha, col(campo)).setValue(p[campo]);
+  });
 
   // Se o pagamento já tiver sido confirmado pelo webhook, avança o status operacional.
   const statusAtual = sheet.getRange(linha, col('StatusServico')).getValue();
@@ -152,6 +174,19 @@ function finalizarPedido_(p) {
   }
 
   return jsonOutput_({ ok: true });
+}
+
+function salvarArquivoPedido_(sheet, linha, col, cfg) {
+  const folder = DriveApp.getFolderById(FOLDER_ID);
+  const bytes = Utilities.base64Decode(cfg.base64);
+  const nomeArquivo = cfg.prefixo + ' - ' + cfg.nome;
+  const blob = Utilities.newBlob(bytes, cfg.tipo, nomeArquivo);
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  const fileId = file.getId();
+  const url = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w800';
+  sheet.getRange(linha, col(cfg.urlCol)).setValue(url);
+  sheet.getRange(linha, col(cfg.idCol)).setValue(fileId);
 }
 
 /**
@@ -286,7 +321,8 @@ function buscarPorWhatsapp_(whatsapp) {
         ok: true,
         pedido: {
           UserId: obj.UserId, Nome: obj.Nome, Comercio: obj.Comercio,
-          Estilo: obj.Estilo, StatusServico: obj.StatusServico
+          Estilo: obj.Estilo, Plano: obj.Plano, StatusServico: obj.StatusServico,
+          NichoEscolhido: obj.NichoEscolhido, ModeloEscolhido: obj.ModeloEscolhido
         }
       });
     }
@@ -302,7 +338,7 @@ function adminAtualizar_(p) {
 
   const col = nome => COLUNAS.indexOf(nome) + 1;
   // Campos que o admin pode editar diretamente.
-  ['Nome', 'Comercio', 'WhatsApp', 'Estilo', 'StatusServico', 'Frases'].forEach(campo => {
+  ['Nome', 'Comercio', 'WhatsApp', 'Estilo', 'StatusServico', 'Frases', 'NichoEscolhido', 'ModeloEscolhido', 'EstiloTexto', 'CorPrincipal', 'TemSegundaCor', 'SegundaCor', 'Observacoes'].forEach(campo => {
     if (Object.prototype.hasOwnProperty.call(p, campo)) {
       sheet.getRange(linha, col(campo)).setValue(p[campo]);
     }

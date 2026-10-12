@@ -8,12 +8,12 @@ const CEF = (() => {
   const LEAD_KEY = 'cef_lead';
 
   const STEPS = [
-    { id: 'dados', label: 'Envio do nome e telefone' },
-    { id: 'estilo', label: 'Escolha do estilo' },
+    { id: 'dados', label: 'Dados do pedido' },
+    { id: 'estilo', label: 'Escolha do plano' },
     { id: 'pagamento', label: 'Confirmação do pagamento' },
-    { id: 'material', label: 'Envio da logo ou foto do perfil' },
-    { id: 'aprovacao', label: 'Aprovação das frases' },
-    { id: 'pacote', label: 'Envio do pacote completo para aprovação' },
+    { id: 'material', label: 'Envio das informações da marca' },
+    { id: 'aprovacao', label: 'Amostra para aprovação' },
+    { id: 'pacote', label: 'Envio do pacote completo' },
   ];
 
   function getProgress() {
