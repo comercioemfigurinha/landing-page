@@ -7,7 +7,7 @@
 <title>Pagamento confirmado | Comércio em Figurinha</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@700&family=Inter:wght@400;500;600;700;800&family=Pacifico&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@700&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -39,10 +39,10 @@
   .style-choice small{display:block;margin-top:6px;color:var(--muted);font-size:12px}
   .style-choice:has(input:checked){border-color:var(--orange);box-shadow:0 0 0 3px color-mix(in srgb,var(--orange) 14%,transparent);background:#fff8fb}
   .style-choice:has(input:checked)::after{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:12px;top:12px;color:var(--orange)}
-  .font-elegante{font-family:"Playfair Display",serif}
+  .font-elegante{font-family:"Playfair Display",serif;font-size:18px!important}
   .font-basica{font-family:Inter,sans-serif;font-weight:800}
   .font-mao{font-family:Caveat,cursive;font-size:26px!important}
-  .font-fluida{font-family:Pacifico,cursive;font-size:20px!important}
+  .font-fluida{font-family:"Great Vibes",cursive;font-size:26px!important}
   .second-color[hidden]{display:none}
   .soft-contact{font-size:13px;color:var(--muted);margin-top:18px}
   .soft-contact a{color:#128c7e;font-weight:800;text-decoration:underline}
@@ -220,7 +220,7 @@ function iniciarFormulario(lead) {
     basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.jpg" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
     renderFinalSteps([
       { icon: 'fa-solid fa-layer-group', title: 'Pacote escolhido', text: 'Você escolheu 1 pacote pronto com 9 figurinhas.' },
-      { icon: 'fa-solid fa-clock', title: 'Prazo de contato', text: 'Em até 12 horas entraremos em contato no WhatsApp.' },
+      { icon: 'fa-solid fa-clock', title: 'Prazo de contato', text: 'Em até 24 horas entraremos em contato no WhatsApp.' },
       { icon: 'fa-solid fa-box-open', title: 'Entrega organizada', text: 'Enviaremos o pacote com instruções fáceis de instalação.' }
     ]);
     finalCard.querySelector('.whats-support').insertAdjacentHTML('afterend', mostrarContatoSuave());
