@@ -7,7 +7,8 @@
 <title>Pagamento confirmado | Comércio em Figurinha</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@700&family=Inter:wght@400;500;600;700;800&family=Pacifico&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="css/style.css">
 <style>
   .success-page{min-height:100vh;padding:36px 20px 60px;background:#fff7f0}
@@ -27,10 +28,34 @@
   .radio-grid input{margin-right:7px}
   .post-form textarea,.post-form select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px 15px;font:inherit;background:#fff}
   .post-form textarea{min-height:96px;resize:vertical}
+  .upload-box{display:block;max-width:100%;overflow:hidden}
+  .upload-box strong{display:inline-flex;align-items:center;gap:8px}
+  .upload-box small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 8px}
+  .style-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .style-choice{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;cursor:pointer;transition:.2s}
+  .style-choice:hover{transform:translateY(-1px);border-color:var(--orange)}
+  .style-choice input{position:absolute;opacity:0;pointer-events:none}
+  .style-choice span{display:block;font-size:20px;line-height:1.1;color:var(--ink)}
+  .style-choice small{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+  .style-choice:has(input:checked){border-color:var(--orange);box-shadow:0 0 0 3px color-mix(in srgb,var(--orange) 14%,transparent);background:#fff8fb}
+  .style-choice:has(input:checked)::after{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:12px;top:12px;color:var(--orange)}
+  .font-elegante{font-family:"Playfair Display",serif}
+  .font-basica{font-family:Inter,sans-serif;font-weight:800}
+  .font-mao{font-family:Caveat,cursive;font-size:26px!important}
+  .font-fluida{font-family:Pacifico,cursive;font-size:20px!important}
   .second-color[hidden]{display:none}
   .soft-contact{font-size:13px;color:var(--muted);margin-top:18px}
   .soft-contact a{color:#128c7e;font-weight:800;text-decoration:underline}
-  @media(max-width:560px){.radio-grid{grid-template-columns:1fr}}
+  .final-card .big-check{font-size:0}
+  .final-card .big-check::before{content:"\f00c";font-family:"Font Awesome 6 Free";font-weight:900;font-size:34px}
+  .final-steps{display:grid;gap:12px;text-align:left;max-width:500px;margin:22px auto}
+  .final-step{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:start;border:1px solid var(--line);border-radius:16px;padding:14px;background:#fffafc}
+  .final-step i{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--orange) 12%,white);color:var(--orange);font-size:18px}
+  .final-step b{display:block;color:var(--ink);margin-bottom:4px}
+  .final-step span{color:var(--muted);line-height:1.45}
+  .final-card ul{display:none}
+  .whats-support .fa-whatsapp{font-size:17px}
+  @media(max-width:560px){.radio-grid,.style-choice-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -58,17 +83,16 @@
     <form class="post-form" id="postForm" hidden>
       <div class="step-copy"><span>ÚLTIMO PASSO</span><h3>Conte como sua marca deve aparecer</h3><p>Com essas informações montamos a amostra completa do pacote personalizado para aprovação.</p></div>
       <div class="compact-fields">
-        <label class="upload-box"><span>Envie uma foto sua para a criação do mascote *</span><input required type="file" name="Foto" id="fotoUpload" accept="image/png,image/jpeg,image/webp"><strong>Escolher foto</strong><small id="fotoName">PNG, JPG ou WEBP</small></label>
-        <label class="upload-box"><span>Envie sua logo, se tiver</span><input type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong>Escolher logo</strong><small id="logoName">Opcional</small></label>
-        <label><span>Qual estilo de texto mais combina com sua marca? *</span>
-          <select required name="EstiloTexto" id="estiloTexto">
-            <option value="">Selecione</option>
-            <option>Elegante</option>
-            <option>Básica (mas com personalidade)</option>
-            <option>Escrita a mão</option>
-            <option>Escrita fluida</option>
-          </select>
-        </label>
+        <label class="upload-box"><span>Envie uma foto sua para a criação do mascote *</span><input required type="file" name="Foto" id="fotoUpload" accept="image/png,image/jpeg,image/webp"><strong><i class="fa-solid fa-image"></i> Escolher foto</strong><small id="fotoName" title="PNG, JPG ou WEBP">PNG, JPG ou WEBP</small></label>
+        <label class="upload-box"><span>Envie sua logo, se tiver</span><input type="file" name="Logo" id="logoUpload" accept="image/png,image/jpeg,image/webp"><strong><i class="fa-solid fa-paperclip"></i> Escolher logo</strong><small id="logoName" title="Opcional">Opcional</small></label>
+        <div><span style="display:block;font-size:13px;font-weight:800;margin-bottom:8px">Qual estilo de texto mais combina com sua marca? *</span>
+          <div class="style-choice-grid" id="styleChoiceGrid">
+            <label class="style-choice"><input required type="radio" name="EstiloTexto" value="Elegante"><span class="font-elegante">Elegante</span><small>Refinado e marcante</small></label>
+            <label class="style-choice"><input required type="radio" name="EstiloTexto" value="Básica (mas com personalidade)"><span class="font-basica">Básica</span><small>Limpa, direta e charmosa</small></label>
+            <label class="style-choice"><input required type="radio" name="EstiloTexto" value="Escrita a mão"><span class="font-mao">Escrita a mão</span><small>Mais próxima e artesanal</small></label>
+            <label class="style-choice"><input required type="radio" name="EstiloTexto" value="Escrita fluida"><span class="font-fluida">Escrita fluida</span><small>Leve e expressiva</small></label>
+          </div>
+        </div>
         <label><span>Qual cor define sua marca? *</span><input required type="text" name="CorPrincipal" id="corPrincipal" placeholder="Ex.: rosa, dourado, azul..."></label>
         <div>
           <span style="display:block;font-size:13px;font-weight:800;margin-bottom:8px">Tem uma segunda cor?</span>
@@ -92,13 +116,14 @@
       <div class="big-check">✓</div>
       <h2>Recebemos tudo, obrigado!</h2>
       <div id="basicPackageBox" class="basic-package" hidden></div>
-      <ul>
+      <ul id="finalLegacyList">
         <li>✅ <span><b>Nossa equipe já está com o serviço em produção.</b></span></li>
         <li>📦 <span>Em até <b>2 dias úteis</b> será enviado o material completo para aprovação pelo seu WhatsApp cadastrado.</span></li>
         <li>🎉 <span>Aprovando, enviamos o <b>pacote completo de figurinhas!</b></span></li>
       </ul>
-      <p style="color:var(--muted)">Ficou com alguma dúvida ou quer acompanhar o andamento? Fale direto com a gente:</p>
-      <a class="whats-support" id="whatsSupportLink" target="_blank" rel="noopener">💬 Falar no WhatsApp</a>
+      <div class="final-steps" id="finalSteps"></div>
+      <p style="color:var(--muted)">Se precisar falar conosco, nos chame pelo WhatsApp:</p>
+      <a class="whats-support" id="whatsSupportLink" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp</a>
       <p style="margin-top:26px"><a href="index.html" style="color:var(--orange);font-weight:800">Voltar ao início</a></p>
     </div>
   </div>
@@ -119,6 +144,7 @@ const logoName = document.querySelector('#logoName');
 const segundaCorWrap = document.querySelector('#segundaCorWrap');
 const segundaCor = document.querySelector('#segundaCor');
 const basicPackageBox = document.querySelector('#basicPackageBox');
+const finalSteps = document.querySelector('#finalSteps');
 const defaults = ['Muito Obrigado.','Já vamos te atender.','PIX recebido!','Só um momento...','Pedido recebido!','Volte sempre!','Boa noite!','Saiu para entrega!','Obrigado pela preferência.'];
 
 document.querySelector('#whatsSupportLink').href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
@@ -130,8 +156,16 @@ function syncPhrases() {
   document.querySelector('#frasesField').value = [...document.querySelectorAll('.phrase-row input')].map((x,i)=>`${i+1} - ${x.value}`).join('\n');
 }
 
-fotoInput?.addEventListener('change', () => fotoName.textContent = fotoInput.files[0]?.name || 'PNG, JPG ou WEBP');
-logoInput?.addEventListener('change', () => logoName.textContent = logoInput.files[0]?.name || 'Opcional');
+fotoInput?.addEventListener('change', () => {
+  const name = fotoInput.files[0]?.name || 'PNG, JPG ou WEBP';
+  fotoName.textContent = name;
+  fotoName.title = name;
+});
+logoInput?.addEventListener('change', () => {
+  const name = logoInput.files[0]?.name || 'Opcional';
+  logoName.textContent = name;
+  logoName.title = name;
+});
 document.querySelectorAll('input[name="TemSegundaCor"]').forEach(input => {
   input.addEventListener('change', () => {
     const sim = document.querySelector('input[name="TemSegundaCor"]:checked')?.value === 'Sim';
@@ -147,13 +181,33 @@ function nomeModelo(modelo) {
 }
 function mostrarContatoSuave() {
   const href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
-  return `<p class="soft-contact">Se precisar falar conosco, o WhatsApp fica aqui: <a href="${href}" target="_blank" rel="noopener">abrir conversa</a>.</p>`;
+  return `<p class="soft-contact">Se precisar falar conosco, nos chame pelo WhatsApp: <a href="${href}" target="_blank" rel="noopener">abrir conversa</a>.</p>`;
+}
+function renderSuccessTracker(lead) {
+  const box = document.querySelector('#trackerBox');
+  if (!box) return;
+  const basic = lead?.estilo === 'Pronto';
+  const steps = basic
+    ? [
+      { id: 'dados', label: 'Dados do pedido' },
+      { id: 'estilo', label: 'Escolha do pacote' },
+      { id: 'pagamento', label: 'Pagamento confirmado' }
+    ]
+    : CEF.STEPS;
+  const progresso = CEF.getProgress();
+  box.innerHTML = `<ol class="tracker">${steps.map(s => {
+    const feito = !!progresso[s.id] || (basic && ['dados','estilo','pagamento'].includes(s.id));
+    return `<li class="${feito ? 'done' : ''}"><span class="tracker-dot">${feito ? '<i class="fa-solid fa-check"></i>' : ''}</span><span class="tracker-text">${s.label}</span></li>`;
+  }).join('')}</ol>`;
+}
+function renderFinalSteps(items) {
+  finalSteps.innerHTML = items.map(item => `<div class="final-step"><i class="${item.icon}"></i><span><b>${item.title}</b>${item.text}</span></div>`).join('');
 }
 
 function iniciarFormulario(lead) {
   CEF.setLead(lead);
   CEF.setProgress({ dados: true, estilo: true, pagamento: true });
-  CEF.renderTracker(document.querySelector('#trackerBox'));
+  renderSuccessTracker(lead);
   lookupBox.hidden = true;
   if (lead.estilo === 'Pronto') {
     postForm.hidden = true;
@@ -164,7 +218,11 @@ function iniciarFormulario(lead) {
     const modeloNumero = String(modelo).match(/-(\d{2})$/)?.[1] || '01';
     basicPackageBox.hidden = false;
     basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.jpg" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
-    finalCard.querySelector('ul').innerHTML = '<li>✅ <span>Você escolheu 1 pacote pronto com 9 figurinhas.</span></li><li>📦 <span>Em até <b>12 horas</b> entraremos em contato no WhatsApp para enviar o pacote organizado e com instruções fáceis de instalação.</span></li>';
+    renderFinalSteps([
+      { icon: 'fa-solid fa-layer-group', title: 'Pacote escolhido', text: 'Você escolheu 1 pacote pronto com 9 figurinhas.' },
+      { icon: 'fa-solid fa-clock', title: 'Prazo de contato', text: 'Em até 12 horas entraremos em contato no WhatsApp.' },
+      { icon: 'fa-solid fa-box-open', title: 'Entrega organizada', text: 'Enviaremos o pacote com instruções fáceis de instalação.' }
+    ]);
     finalCard.querySelector('.whats-support').insertAdjacentHTML('afterend', mostrarContatoSuave());
     finalCard.querySelector('.whats-support').style.display = 'none';
   } else {
@@ -223,7 +281,7 @@ postForm.addEventListener('submit', async e => {
     fd.append('UserId', lead.userId);
     fd.append('Comercio', lead.comercio || '');
     fd.append('Frases', document.querySelector('#frasesField').value);
-    fd.append('EstiloTexto', document.querySelector('#estiloTexto').value);
+    fd.append('EstiloTexto', document.querySelector('input[name="EstiloTexto"]:checked')?.value || '');
     fd.append('CorPrincipal', document.querySelector('#corPrincipal').value);
     fd.append('TemSegundaCor', document.querySelector('input[name="TemSegundaCor"]:checked')?.value || 'Não');
     fd.append('SegundaCor', document.querySelector('#segundaCor').value);
@@ -243,12 +301,16 @@ postForm.addEventListener('submit', async e => {
     if (!data.ok) throw new Error(data.error || 'Falha ao enviar.');
 
     CEF.setProgress({ dados: true, estilo: true, pagamento: true, material: true });
-    CEF.renderTracker(document.querySelector('#trackerBox'));
+    renderSuccessTracker(lead);
     CEF.hideLoading();
     postForm.hidden = true;
     finalCard.hidden = false;
     finalCard.querySelector('h2').textContent = 'Recebemos suas informações!';
-    finalCard.querySelector('ul').innerHTML = '<li>✅ <span><b>Agora vamos montar a amostra completa do seu pacote personalizado.</b></span></li><li>📦 <span>Em até <b>2 dias úteis</b> entraremos em contato pelo WhatsApp para enviar a amostra completa para aprovação.</span></li><li>🎉 <span>Após sua aprovação, enviaremos o pacote completo de forma organizada e com instalação fácil.</span></li>';
+    renderFinalSteps([
+      { icon: 'fa-solid fa-wand-magic-sparkles', title: 'Amostra em produção', text: 'Agora vamos montar a amostra completa do seu pacote personalizado.' },
+      { icon: 'fa-solid fa-calendar-check', title: 'Prazo de aprovação', text: 'Em até 2 dias úteis entraremos em contato pelo WhatsApp para enviar a amostra completa.' },
+      { icon: 'fa-solid fa-box-open', title: 'Pacote final', text: 'Após sua aprovação, enviaremos o pacote completo de forma organizada e com instalação fácil.' }
+    ]);
   } catch (err) {
     console.error(err);
     CEF.hideLoading();
@@ -263,8 +325,14 @@ postForm.addEventListener('submit', async e => {
 
   if (progresso.material) {
     // Já finalizou antes (ex.: deu refresh na página) — mostra direto a tela final.
-    CEF.renderTracker(document.querySelector('#trackerBox'));
+    renderSuccessTracker(lead);
     finalCard.hidden = false;
+    finalCard.querySelector('h2').textContent = 'Recebemos suas informações!';
+    renderFinalSteps([
+      { icon: 'fa-solid fa-wand-magic-sparkles', title: 'Amostra em produção', text: 'Agora vamos montar a amostra completa do seu pacote personalizado.' },
+      { icon: 'fa-solid fa-calendar-check', title: 'Prazo de aprovação', text: 'Em até 2 dias úteis entraremos em contato pelo WhatsApp para enviar a amostra completa.' },
+      { icon: 'fa-solid fa-box-open', title: 'Pacote final', text: 'Após sua aprovação, enviaremos o pacote completo de forma organizada e com instalação fácil.' }
+    ]);
     return;
   }
 
