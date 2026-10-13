@@ -293,6 +293,7 @@ form.addEventListener('submit', async e => {
     const data = await res.json().catch(() => ({ ok: res.ok }));
     if (!data.ok) throw new Error(data.error || 'Falha ao registrar o pedido.');
 
+    CEF.clearAll();
     CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo, plano: isBasic() ? 'Básico' : 'Personalizado', valor: isBasic() ? 'R$ 14,50' : 'R$ 39,40', tema: temaAtual, nicho: chosenNiche, modelo: chosenModel });
     CEF.setProgress({ dados: true, estilo: true });
 

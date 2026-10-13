@@ -323,7 +323,12 @@ postForm.addEventListener('submit', async e => {
   const progresso = CEF.getProgress();
   const lead = CEF.getLead();
 
-  if (progresso.material) {
+  if (lead.userId && lead.estilo === 'Pronto') {
+    iniciarFormulario(lead);
+    return;
+  }
+
+  if (lead.userId && progresso.material) {
     // Já finalizou antes (ex.: deu refresh na página) — mostra direto a tela final.
     renderSuccessTracker(lead);
     finalCard.hidden = false;
