@@ -71,26 +71,16 @@ const CEF = (() => {
     return 'usr_' + rand.slice(0, 12);
   }
 
-  // Overlay de carregamento com mensagens que vão mudando durante operações remotas.
-  let msgTimer = null;
-  function showLoading(mensagens) {
+  // Exibe o indicador somente durante a gravação real no Supabase.
+  function showLoading(mensagem) {
     const overlay = document.querySelector('#cefLoading');
     if (!overlay) return;
     const textEl = overlay.querySelector('.loading-text');
-    const lista = Array.isArray(mensagens) ? mensagens : [mensagens];
-    let i = 0;
-    textEl.textContent = lista[0];
+    textEl.textContent = Array.isArray(mensagem) ? mensagem[0] : mensagem;
     overlay.classList.add('show');
-    if (lista.length > 1) {
-      msgTimer = setInterval(() => {
-        i = (i + 1) % lista.length;
-        textEl.textContent = lista[i];
-      }, 2600);
-    }
   }
   function hideLoading() {
     const overlay = document.querySelector('#cefLoading');
-    if (msgTimer) { clearInterval(msgTimer); msgTimer = null; }
     if (overlay) overlay.classList.remove('show');
   }
 
