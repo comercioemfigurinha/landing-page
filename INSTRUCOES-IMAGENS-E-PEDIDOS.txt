@@ -1,2 +1,0 @@
-Adicione imagens quadradas WEBP em assets/pacotes/NICHO/modelo-01.webp, modelo-02.webp, modelo-03.webp. Cada imagem deve mostrar as 9 figurinhas. Para personalizado: assets/personalizados/foto-exemplo.webp e figurinha-exemplo.webp.
-A selecao e preservada na sessao e enviada ao Apps Script como NichoEscolhido e ModeloEscolhido. IMPORTANTE: atualize o Apps Script e a planilha para armazenar esses campos junto ao UserId; valide no webhook Kiwify a conciliacao do pagamento pelo UserId (s1). Configure os dois links de checkout em js/sheets-config.js.

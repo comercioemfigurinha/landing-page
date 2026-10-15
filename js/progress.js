@@ -71,8 +71,7 @@ const CEF = (() => {
     return 'usr_' + rand.slice(0, 12);
   }
 
-  // Overlay de carregamento com mensagens que vão mudando — usado nos momentos em que
-  // o Google Sheets/Drive pode demorar alguns segundos, pra ninguém achar que travou.
+  // Overlay de carregamento com mensagens que vão mudando durante operações remotas.
   let msgTimer = null;
   function showLoading(mensagens) {
     const overlay = document.querySelector('#cefLoading');

@@ -1,316 +1,43 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>Painel — Comércio em Figurinha</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{--orange:#ff6900;--orange2:#ff8a00;--ink:#281006;--muted:#6f625d;--cream:#fff8f2;--line:#eadfd8}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--cream);min-height:100vh}
-  h1,h2,h3{font-family:"Baloo 2",Inter,sans-serif;margin:0}
-  header{background:#fff;padding:18px max(4vw,20px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-  header h1{font-size:22px}
-  header b{color:var(--orange)}
-  .actions{display:flex;gap:10px}
-  button{font:800 14px Inter;border:0;border-radius:12px;padding:11px 16px;cursor:pointer;transition:.2s}
-  button:hover{transform:translateY(-1px)}
-  .btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange2));color:#fff}
-  .btn-ghost{background:#fff;border:1px solid var(--line)!important;color:var(--ink)}
-  .btn-danger{background:#fff;border:1px solid #f0c6c6!important;color:#c62828}
-
-  #gate{min-height:100vh;padding:20px}
-  #gate:not([hidden]){display:flex;align-items:center;justify-content:center}
-  #gate[hidden],#painel[hidden]{display:none}
-  .gate-card{background:#fff;border-radius:24px;padding:36px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(61,26,5,.12);text-align:center}
-  .gate-card p{color:var(--muted);font-size:14px;margin:8px 0 20px}
-  .gate-card input{width:100%;border:1px solid var(--line);border-radius:12px;padding:14px 15px;font:inherit;margin-bottom:14px;outline:none}
-  .gate-card input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,105,0,.1)}
-  .gate-card button{width:100%}
-  .gate-error{color:#c62828;font-size:13px;min-height:18px;margin-bottom:6px}
-
-  main{max-width:1300px;margin:0 auto;padding:26px max(4vw,20px) 60px}
-  .status{color:var(--muted);font-size:13px;margin:0 0 18px}
-  .empty{text-align:center;color:var(--muted);padding:60px 20px}
-  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-  .filters button{background:#fff;border:1px solid var(--line)!important;color:var(--muted);padding:8px 14px;font-size:12.5px}
-  .filters button.active{background:var(--ink);color:#fff;border-color:var(--ink)!important}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
-  .card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(60,30,15,.06);display:flex;flex-direction:column;gap:12px}
-  .card-top{display:flex;gap:14px;align-items:center}
-  .card-top img{width:62px;height:62px;border-radius:14px;object-fit:cover;background:#f1e9e2;flex-shrink:0}
-  .card-top .noimg{width:62px;height:62px;border-radius:14px;background:#fff1e8;color:var(--orange);display:grid;place-items:center;font-size:22px;flex-shrink:0}
-  .card-top h3{font-size:18px}
-  .card-top small{color:var(--muted);display:block;margin-top:2px}
-  .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-top:1px solid var(--line);padding-top:10px}
-  .row b{font-weight:800}
-  .pill{display:inline-block;background:var(--cream);color:var(--orange);font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}
-  .pill.pago{background:#e5f7ee;color:#1a8a4a}
-  .pill.recusado,.pill.reembolsado{background:#fdeaea;color:#c62828}
-  .pill.etapa1{background:#fdeaea;color:#c62828}
-  .pill.etapa2{background:#fff3d9;color:#a1710a}
-  .pill.etapa3{background:#e8f0fe;color:#1a56b0}
-  .filters-label{width:100%;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
-  .pill.pendente{background:#fff3d9;color:#a1710a}
-  .frases{font-size:12.5px;color:var(--muted);white-space:pre-wrap;background:var(--cream);border-radius:12px;padding:10px 12px;max-height:120px;overflow:auto}
-  .status-select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:700 13px Inter;color:var(--ink);background:#fff}
-  .card-links{display:flex;gap:8px;flex-wrap:wrap}
-  .card-links a,.card-links button{flex:1;text-align:center;font-size:12.5px;font-weight:800;padding:9px;border-radius:10px;background:var(--ink);color:#fff;min-width:80px}
-  .card-links a.whats{background:#128c7e}
-  .edit-fields{display:none;grid-template-columns:1fr 1fr;gap:8px}
-  .edit-fields.open{display:grid}
-  .edit-fields label{grid-column:span 2;font-size:11px;color:var(--muted);font-weight:800}
-  .edit-fields input,.edit-fields textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:13px Inter;margin-top:3px}
-  .edit-fields textarea{grid-column:span 2;min-height:80px}
-  .edit-fields .save-row{grid-column:span 2;display:flex;gap:8px;margin-top:4px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Painel | Comércio em Figurinha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{background:#fff8f2;color:var(--ink);min-height:100vh}button{border:0;cursor:pointer;font:inherit}
+    #gate{min-height:100vh;display:grid;place-items:center;padding:24px}.gate-card{width:min(420px,100%);background:#fff;border-radius:24px;padding:32px;box-shadow:0 18px 55px rgba(70,35,15,.12)}
+    .gate-card h2{font:800 28px "Baloo 2";margin:0 0 5px}.gate-card p{color:var(--muted);font-size:14px;margin:0 0 20px}.gate-card input{width:100%;border:1px solid var(--line);border-radius:12px;padding:14px 15px;font:inherit;margin-bottom:12px;outline:none}.gate-card input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,105,0,.1)}.gate-card button{width:100%}.gate-error{color:#c62828;font-size:13px;min-height:18px;margin-bottom:6px}
+    header{background:#fff;padding:16px max(4vw,20px);display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}header h1{font:800 clamp(18px,3vw,25px) "Baloo 2"}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{padding:9px 13px;border-radius:10px}
+    main{max-width:1300px;margin:0 auto;padding:26px max(4vw,20px) 60px}.status{color:var(--muted);font-size:13px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.filters-label{width:100%;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase}.filters button{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12px}.filters button.active{background:var(--ink);color:#fff}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}.empty{text-align:center;color:var(--muted);padding:60px}
+    .card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(60,30,15,.06);display:flex;flex-direction:column;gap:11px}.card-top{display:flex;gap:14px;align-items:center}.card-top img,.card-top .noimg{width:62px;height:62px;border-radius:14px;object-fit:cover;background:#fff1e8;display:grid;place-items:center;color:var(--orange);flex-shrink:0}.card-top h3{font-size:18px}.card-top small{color:var(--muted)}.row{display:flex;justify-content:space-between;gap:10px;font-size:13px;border-top:1px solid var(--line);padding-top:10px}.pill{display:inline-block;background:var(--cream);color:var(--orange);font-weight:800;font-size:12px;padding:4px 10px;border-radius:999px}.pill.pago{background:#e5f7ee;color:#1a8a4a}.pill.recusado,.pill.reembolsado{background:#fdeaea;color:#c62828}.status-select{border:1px solid var(--line);border-radius:9px;padding:7px;font:700 12px Inter;background:#fff}.frases{font-size:12px;color:var(--muted);white-space:pre-wrap;background:var(--cream);border-radius:12px;padding:10px;max-height:120px;overflow:auto}.card-links{display:flex;gap:7px;flex-wrap:wrap}.card-links a,.card-links button{flex:1;text-align:center;font-size:12px;font-weight:800;padding:9px;border-radius:9px;background:var(--ink);color:#fff;min-width:76px}.card-links .whats{background:#128c7e}.card-links .btn-danger{background:#b42318}
+    @media(max-width:650px){header{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions button{flex:1}.gate-card{padding:24px}}
+  </style>
 </head>
 <body>
-
-<div id="gate">
-  <div class="gate-card">
-    <h2>Painel de cadastros</h2>
-    <p>Digite a senha para ver os pedidos recebidos pelo site.</p>
-    <div class="gate-error" id="gateError"></div>
-    <input type="password" id="senhaInput" placeholder="Senha" autofocus>
-    <button class="btn-primary" id="entrarBtn">Entrar</button>
-  </div>
-</div>
-
-<div id="painel" hidden>
-  <header>
-    <h1>Comércio em Figurinha — <b>Painel</b></h1>
-    <div class="actions">
-      <button class="btn-ghost" id="refreshBtn">↻ Atualizar</button>
-      <button class="btn-ghost" id="sairBtn">Sair</button>
+  <div id="gate">
+    <div class="gate-card">
+      <h2>Painel de pedidos</h2>
+      <p>Entre com o usuário administrador cadastrado no Supabase.</p>
+      <div class="gate-error" id="gateError"></div>
+      <input type="email" id="emailInput" placeholder="E-mail" autocomplete="username" autofocus>
+      <input type="password" id="senhaInput" placeholder="Senha" autocomplete="current-password">
+      <button class="btn-primary" id="entrarBtn">Entrar com segurança</button>
     </div>
-  </header>
-  <main>
-    <p class="status" id="status"></p>
-    <div class="filters" id="filters"></div>
-    <div class="grid" id="grid"></div>
-  </main>
-</div>
-
-<script src="js/sheets-config.js"></script>
-<script>
-const gate=document.querySelector('#gate'),painel=document.querySelector('#painel');
-const senhaInput=document.querySelector('#senhaInput'),gateError=document.querySelector('#gateError');
-const grid=document.querySelector('#grid'),status_=document.querySelector('#status');
-const filtersBox=document.querySelector('#filters');
-let TODOS_REGISTROS=[];
-let FILTRO_ATUAL='Todos';
-let FILTRO_ETAPA='Todas';
-const ETAPA_OPCOES=['Etapa 1 · Plano','Etapa 2 · Modelo','Etapa 3 · Checkout'];
-const STATUS_OPCOES=['A pagar','Pago','Em aprovação','Concluído','Recusado','Reembolsado'];
-
-function scriptUrl(){
-  const cfg=window.SHEETS_CONFIG||{};
-  if(!cfg.scriptUrl||String(cfg.scriptUrl).includes('COLE_')) return null;
-  return cfg.scriptUrl;
-}
-function senhaAtual(){ return sessionStorage.getItem('painel_senha')||''; }
-
-async function carregar(senha){
-  const url=scriptUrl();
-  if(!url){gateError.textContent='Configuração pendente: cole a URL do Apps Script em js/sheets-config.js.';return}
-  gateError.textContent='';
-  status_.textContent='Carregando...';
-  try{
-    const res=await fetch(url+'?senha='+encodeURIComponent(senha));
-    const data=await res.json();
-    if(!data.ok){
-      if(data.error==='senha_invalida'){gateError.textContent='Senha incorreta.';return}
-      throw new Error(data.error||'Erro desconhecido');
-    }
-    sessionStorage.setItem('painel_senha',senha);
-    gate.hidden=true;painel.hidden=false;
-    TODOS_REGISTROS=data.registros||[];
-    renderFiltros();
-    render();
-  }catch(err){
-    console.error(err);
-    gateError.textContent='Não foi possível conectar. Tente novamente.';
-    status_.textContent='';
-  }
-}
-
-function renderFiltros(){
-  const contagem={},contEtapa={};
-  TODOS_REGISTROS.forEach(r=>{
-    const s=r.StatusServico||'A pagar';contagem[s]=(contagem[s]||0)+1;
-    const e=r.Etapa||ETAPA_OPCOES[2];contEtapa[e]=(contEtapa[e]||0)+1;
-  });
-  const etapas=['Todas',...ETAPA_OPCOES];
-  const grupos=['Todos',...STATUS_OPCOES];
-  filtersBox.innerHTML=
-    '<span class="filters-label">Até onde chegou no formulário</span>'+
-    etapas.map(g=>{
-      const n=g==='Todas'?TODOS_REGISTROS.length:(contEtapa[g]||0);
-      return `<button data-etapa="${g}" class="${g===FILTRO_ETAPA?'active':''}">${g} (${n})</button>`;
-    }).join('')+
-    '<span class="filters-label">Status do serviço</span>'+
-    grupos.map(g=>{
-      const n=g==='Todos'?TODOS_REGISTROS.length:(contagem[g]||0);
-      return `<button data-filtro="${g}" class="${g===FILTRO_ATUAL?'active':''}">${g} (${n})</button>`;
-    }).join('');
-  filtersBox.querySelectorAll('button[data-filtro]').forEach(b=>b.addEventListener('click',()=>{FILTRO_ATUAL=b.dataset.filtro;renderFiltros();render()}));
-  filtersBox.querySelectorAll('button[data-etapa]').forEach(b=>b.addEventListener('click',()=>{FILTRO_ETAPA=b.dataset.etapa;renderFiltros();render()}));
-}
-
-function render(){
-  const registros=TODOS_REGISTROS
-    .filter(r=>FILTRO_ATUAL==='Todos'||(r.StatusServico||'A pagar')===FILTRO_ATUAL)
-    .filter(r=>FILTRO_ETAPA==='Todas'||(r.Etapa||ETAPA_OPCOES[2])===FILTRO_ETAPA);
-  status_.textContent=registros.length+' de '+TODOS_REGISTROS.length+' cadastro(s).';
-  if(!registros.length){grid.innerHTML='<div class="empty">Nenhum cadastro nesse filtro.</div>';return}
-  grid.innerHTML=registros.map(r=>{
-    const digits=(r.WhatsApp||'').replace(/\D/g,'');
-    const wa=digits?`https://wa.me/55${digits}`:'#';
-    const img=(r.FotoUrl||r.LogoUrl)
-      ?`<img src="${r.FotoUrl||r.LogoUrl}" alt="Imagem ${r.Comercio||r.Nome||''}" loading="lazy">`
-      :`<div class="noimg">🖼️</div>`;
-    const pagCls=(r.StatusPagamento||'').toLowerCase();
-    const titulo=r.Comercio||r.Nome||'Sem nome';
-    const plano=r.Plano||((r.Estilo==='Pronto')?'Básico':(r.Estilo==='Personalizado'?'Personalizado':''));
-    const modelo=[r.NichoEscolhido,r.ModeloEscolhido].filter(Boolean).join(' · ');
-    const detalhesPersonalizado=[
-      r.EstiloTexto&&`Texto: ${r.EstiloTexto}`,
-      r.CorPrincipal&&`Cor: ${r.CorPrincipal}`,
-      r.TemSegundaCor&&`Segunda cor: ${r.TemSegundaCor}${r.SegundaCor?' · '+r.SegundaCor:''}`,
-      r.Observacoes&&`Obs.: ${r.Observacoes}`
-    ].filter(Boolean).join('\n');
-    return `<div class="card" data-userid="${r.UserId}">
-      <div class="card-top">
-        ${img}
-        <div><h3>${escapeHtml(titulo)}</h3><small>${escapeHtml(r.Nome||'')} · ${escapeHtml(r.Data||'')}</small></div>
-      </div>
-      <div class="row"><span>Etapa do formulário</span><span class="pill etapa${(r.Etapa||ETAPA_OPCOES[2]).match(/\d/)[0]}">${escapeHtml(r.Etapa||ETAPA_OPCOES[2])}</span></div>
-      <div class="row"><span>Plano</span><b>${escapeHtml(plano||r.Estilo||'—')}</b></div>
-      ${modelo?`<div class="row"><span>Pacote escolhido</span><b>${escapeHtml(modelo)}</b></div>`:''}
-      <div class="row"><span>Valor</span><span class="pill">${escapeHtml(r.Valor||'')}</span></div>
-      <div class="row"><span>Pagamento</span><span class="pill ${pagCls}">${escapeHtml(r.StatusPagamento||'pendente')}${r.FormaPagamento?' · '+escapeHtml(r.FormaPagamento):''}</span></div>
-      <div class="row"><span>WhatsApp</span><b>${escapeHtml(r.WhatsApp||'')}</b></div>
-      <div class="row" style="align-items:center">
-        <span>Status do serviço</span>
-        <select class="status-select" data-action="status">
-          ${STATUS_OPCOES.map(s=>`<option value="${s}" ${s===(r.StatusServico||'A pagar')?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </div>
-      ${detalhesPersonalizado?`<div class="frases">${escapeHtml(detalhesPersonalizado)}</div>`:''}
-      ${r.Frases?`<div class="frases">${escapeHtml(r.Frases)}</div>`:''}
-      <div class="card-links">
-        <a class="whats" href="${wa}" target="_blank" rel="noopener">Abrir WhatsApp</a>
-        ${r.FotoFileId?`<a href="https://drive.google.com/file/d/${r.FotoFileId}/view" target="_blank" rel="noopener">Ver foto</a>`:''}
-        ${r.LogoFileId?`<a href="https://drive.google.com/file/d/${r.LogoFileId}/view" target="_blank" rel="noopener">Ver logo</a>`:''}
-        <button data-action="link-pagamento">Copiar link de pagamento</button>
-        <button data-action="editar">Editar</button>
-        <button class="btn-danger" data-action="excluir">Excluir</button>
-      </div>
-      <div class="edit-fields" data-edit-box>
-        <label>Nome<input data-field="Nome" value="${escapeAttr(r.Nome||'')}"></label>
-        <label>Comércio<input data-field="Comercio" value="${escapeAttr(r.Comercio||'')}"></label>
-        <label>WhatsApp<input data-field="WhatsApp" value="${escapeAttr(r.WhatsApp||'')}"></label>
-        <label>Estilo
-          <select data-field="Estilo">
-            <option value="Pronto" ${r.Estilo==='Pronto'?'selected':''}>Pronto</option>
-            <option value="Personalizado" ${r.Estilo==='Personalizado'?'selected':''}>Personalizado</option>
-          </select>
-        </label>
-        <label>Nicho<input data-field="NichoEscolhido" value="${escapeAttr(r.NichoEscolhido||'')}"></label>
-        <label>Modelo<input data-field="ModeloEscolhido" value="${escapeAttr(r.ModeloEscolhido||'')}"></label>
-        <label>Estilo do texto<input data-field="EstiloTexto" value="${escapeAttr(r.EstiloTexto||'')}"></label>
-        <label>Cor principal<input data-field="CorPrincipal" value="${escapeAttr(r.CorPrincipal||'')}"></label>
-        <label>Segunda cor<input data-field="SegundaCor" value="${escapeAttr(r.SegundaCor||'')}"></label>
-        <label>Observações<textarea data-field="Observacoes">${escapeHtml(r.Observacoes||'')}</textarea></label>
-        <label>Frases<textarea data-field="Frases">${escapeHtml(r.Frases||'')}</textarea></label>
-        <div class="save-row">
-          <button class="btn-primary" data-action="salvar" style="flex:1">Salvar</button>
-          <button class="btn-ghost" data-action="cancelar" style="flex:1">Cancelar</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  grid.querySelectorAll('.card').forEach(card=>{
-    const userId=card.dataset.userid;
-    const registro=TODOS_REGISTROS.find(r=>r.UserId===userId);
-    card.querySelector('[data-action="status"]').addEventListener('change',e=>atualizarCampo(userId,{StatusServico:e.target.value}));
-    card.querySelector('[data-action="editar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.toggle('open'));
-    card.querySelector('[data-action="cancelar"]').addEventListener('click',()=>card.querySelector('[data-edit-box]').classList.remove('open'));
-    card.querySelector('[data-action="excluir"]').addEventListener('click',()=>excluir(userId,card));
-    card.querySelector('[data-action="link-pagamento"]').addEventListener('click',e=>copiarLinkPagamento(registro,e.target));
-    card.querySelector('[data-action="salvar"]').addEventListener('click',()=>{
-      const campos={};
-      card.querySelectorAll('[data-field]').forEach(el=>campos[el.dataset.field]=el.value);
-      atualizarCampo(userId,campos,()=>card.querySelector('[data-edit-box]').classList.remove('open'));
-    });
-  });
-}
-
-function copiarLinkPagamento(registro,botao){
-  const cfg=window.SHEETS_CONFIG||{};
-  const checkout=registro.Estilo==='Pronto'?cfg.kiwifyCheckoutProntoUrl:(cfg.kiwifyCheckoutPersonalizadoUrl||cfg.kiwifyCheckoutUrl);
-  if(!checkout){alert('Configure o link de checkout em js/sheets-config.js.');return}
-  const digits=(registro.WhatsApp||'').replace(/\D/g,'');
-  const params=new URLSearchParams({name:registro.Nome||'',phone:digits,s1:registro.UserId||''});
-  const link=`${checkout}${checkout.includes('?')?'&':'?'}${params.toString()}`;
-  const marcarCopiado=()=>{const t=botao.textContent;botao.textContent='Link copiado!';setTimeout(()=>botao.textContent=t,1800)};
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(link).then(marcarCopiado).catch(()=>prompt('Copie o link:',link));
-  }else{
-    prompt('Copie o link:',link);
-  }
-}
-
-async function atualizarCampo(userId,campos,onOk){
-  const url=scriptUrl(); if(!url) return;
-  try{
-    const fd=new FormData();
-    fd.append('acao','admin_atualizar');
-    fd.append('senha',senhaAtual());
-    fd.append('UserId',userId);
-    Object.entries(campos).forEach(([k,v])=>fd.append(k,v));
-    const res=await fetch(url,{method:'POST',body:fd});
-    const data=await res.json();
-    if(!data.ok){alert('Não foi possível salvar: '+(data.error||'erro desconhecido'));return}
-    const reg=TODOS_REGISTROS.find(r=>r.UserId===userId);
-    if(reg) Object.assign(reg,campos);
-    renderFiltros();render();
-    onOk&&onOk();
-  }catch(err){console.error(err);alert('Não foi possível salvar agora. Tente novamente.')}
-}
-
-async function excluir(userId,card){
-  if(!confirm('Tem certeza que quer excluir este cadastro? Essa ação não pode ser desfeita.')) return;
-  const url=scriptUrl(); if(!url) return;
-  try{
-    const fd=new FormData();
-    fd.append('acao','admin_excluir');
-    fd.append('senha',senhaAtual());
-    fd.append('UserId',userId);
-    const res=await fetch(url,{method:'POST',body:fd});
-    const data=await res.json();
-    if(!data.ok){alert('Não foi possível excluir: '+(data.error||'erro desconhecido'));return}
-    TODOS_REGISTROS=TODOS_REGISTROS.filter(r=>r.UserId!==userId);
-    renderFiltros();render();
-  }catch(err){console.error(err);alert('Não foi possível excluir agora. Tente novamente.')}
-}
-
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function escapeAttr(str){ return escapeHtml(str); }
-
-document.querySelector('#entrarBtn').addEventListener('click',()=>carregar(senhaInput.value.trim()));
-senhaInput.addEventListener('keydown',e=>{if(e.key==='Enter')carregar(senhaInput.value.trim())});
-document.querySelector('#refreshBtn').addEventListener('click',()=>carregar(senhaAtual()));
-document.querySelector('#sairBtn').addEventListener('click',()=>{sessionStorage.removeItem('painel_senha');painel.hidden=true;gate.hidden=false;senhaInput.value='';senhaInput.focus()});
-
-const senhaSalva=senhaAtual();
-if(senhaSalva) carregar(senhaSalva);
-</script>
+  </div>
+  <div id="painel" hidden>
+    <header><h1>Comércio em Figurinha — <b>Painel</b></h1><div class="actions"><button class="btn-ghost" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button><button class="btn-ghost" id="exportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button><button class="btn-ghost" id="sairBtn">Sair</button></div></header>
+    <main><p class="status" id="status"></p><div class="filters" id="filters"></div><div class="grid" id="grid"></div></main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/admin.js"></script>
 </body>
 </html>

@@ -36,7 +36,7 @@
   <!-- End Meta Pixel Code -->
   <header class="topbar">
     <a class="brand" href="#inicio" aria-label="Comércio em Figurinha - início">
-      <img src="assets/logo.png" alt="Comércio em Figurinha">
+      <img src="assets/logo.webp" alt="Comércio em Figurinha">
     </a>
     <a class="top-cta" href="#montar">Quero minhas figurinhas</a>
   </header>
@@ -132,7 +132,7 @@
         <section class="form-step" data-step="2"><div class="step-copy"><span>PASSO 2</span><h3 id="choiceHeading">Escolha seu modelo</h3><p id="choiceDesc">Selecione um pacote com 9 figurinhas. Toque na lupa para ampliar.</p></div>
           <div id="basicPicker"><div id="temaInfo" class="tema-info"></div><div id="modelGrid" class="model-grid"></div>
 </div>
-          <div id="customPreview" hidden><p>Seu mascote poderá ser criado com base na foto do dono(a) ou em um personagem fictício que represente a marca.</p><div class="custom-images"><div><img src="assets/personalizados/exemplo-01-foto.jpg" alt="Foto de referência" onerror="this.style.display='none'"><span>Foto original</span></div><div><img src="assets/personalizados/exemplo-01-mascote.jpg" alt="Figurinha personalizada" onerror="this.style.display='none'"><span>Figurinha criada</span></div></div><p>Após o pagamento, combinaremos as fotos, frases, cores e estilos para as suas figurinhas!</p></div>
+          <div id="customPreview" hidden><p>Seu mascote poderá ser criado com base na foto do dono(a) ou em um personagem fictício que represente a marca.</p><div class="custom-images"><div><img src="assets/personalizados/exemplo-01-foto.webp" alt="Foto de referência" onerror="this.style.display='none'"><span>Foto original</span></div><div><img src="assets/personalizados/exemplo-01-mascote.webp" alt="Figurinha personalizada" onerror="this.style.display='none'"><span>Figurinha criada</span></div></div><p>Após o pagamento, combinaremos as fotos, frases, cores e estilos para as suas figurinhas!</p></div>
         </section>
         <section class="form-step" data-step="3"><div class="step-copy"><span>QUASE PRONTO</span><h3>Seu pacote está quase pronto!</h3><p id="contactHelp">Informe seus dados para identificarmos seu pedido.</p></div><div id="summaryLine" class="tema-info"></div>          <div class="compact-fields">
             <label><span>Seu nome *</span><input required name="Nome" placeholder="Como podemos te chamar?"></label>
@@ -164,14 +164,16 @@
     </section>
   </main>
 
-  <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
+  <footer><img src="assets/logo.webp" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
 
   <div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
 
   <!-- Iframe para carregar o botão flutuante -->
   <iframe src="whatsapp-icon.html" style="position: fixed; bottom: 0px; right: 0px; width: 80px; height: 80px; border: none; z-index: 9999; scrolling: no; overflow: hidden;"></iframe>
 
-  <script src="js/sheets-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/progress.js"></script>
   <script src="js/script.js"></script>
   <script type="text/javascript">

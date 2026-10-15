@@ -14,7 +14,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="index.html" aria-label="Comércio em Figurinha - início">
-      <img src="assets/logo.png" alt="Comércio em Figurinha">
+      <img src="assets/logo.webp" alt="Comércio em Figurinha">
     </a>
     <a class="top-cta" href="index.html#montar">Quero minhas figurinhas</a>
   </header>
@@ -100,11 +100,11 @@
     <p class="legal-back"><a href="index.html">← Voltar para o início</a></p>
   </main>
 
-  <footer><img src="assets/logo.png" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha.</small></footer>
+  <footer><img src="assets/logo.webp" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha.</small></footer>
 
-  <script src="js/sheets-config.js"></script>
+  <script src="js/supabase-config.js"></script>
   <script>
-    document.querySelector('#whatsSupportLink').href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
+    document.querySelector('#whatsSupportLink').href = (window.CHECKOUT_CONFIG||{}).whatsappSuporte || '#';
     document.querySelector('#year').textContent = new Date().getFullYear();
   </script>
 </body>

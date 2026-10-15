@@ -20,6 +20,12 @@ const nicheInput = document.querySelector('#nichoEscolhido'), modelInput = docum
 const availableNiches = ['confeitaria'];
 let chosenNiche = 'confeitaria';
 let chosenModel = '';
+if (!sessionStorage.getItem('cef_landing_order_active')) {
+  CEFSupabase.clearOrderSession();
+  CEF.clearAll();
+  sessionStorage.removeItem('cefPedido');
+  sessionStorage.setItem('cef_landing_order_active', '1');
+}
 const saved = (() => {try{return JSON.parse(sessionStorage.getItem('cefPedido')||'{}')}catch{return {}}})();
 if(saved.nicho && availableNiches.includes(saved.nicho)) chosenNiche=saved.nicho;
 if(saved.modelo && saved.modelo.startsWith(chosenNiche+'-')) chosenModel=saved.modelo;
@@ -27,7 +33,7 @@ function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenMod
 function renderModels(){
   persistChoice();
   temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
-  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.jpg`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
+  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
   document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
   document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>{document.querySelector('#lightboxImg').src=b.dataset.path;document.querySelector('#imageLightbox').hidden=false});
 }
@@ -49,28 +55,33 @@ if(saved.plano==='Personalizado'){document.querySelector('#personalizadoCard inp
 updateChoice();
 // UserId único desta visita: nasce na etapa 1 e é reaproveitado até o checkout,
 // assim a mesma linha da planilha vai sendo atualizada (sem duplicar).
-let userId = null;
+let userId = CEFSupabase.getOrderSession()?.orderId || null;
+
+function orderPayload(etapa) {
+  return {
+    form_step: etapa,
+    customer_name: form.Nome.value.trim(),
+    business_name: form.Comercio.value.trim(),
+    whatsapp: CEFSupabase.cleanPhone(form.WhatsApp.value),
+    plan: isBasic() ? 'basico' : 'personalizado',
+    amount_cents: isBasic() ? 1450 : 3940,
+    campaign_theme: temaAtual,
+    niche: chosenNiche,
+    package_model: chosenModel,
+    payment_status: 'pendente',
+    service_status: 'a_pagar'
+  };
+}
 
 // Registra no admin até onde a pessoa chegou (etapa 1, 2 ou 3).
 // Não bloqueia a navegação: se falhar, o formulário segue normalmente.
-function salvarEtapa(etapa) {
-  const cfg = window.SHEETS_CONFIG || {};
-  if (!cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_')) return;
-  if (!userId) userId = CEF.gerarUserId();
-  const fd = new FormData();
-  fd.append('acao', 'criar_lead');
-  fd.append('Etapa', String(etapa));
-  fd.append('UserId', userId);
-  fd.append('Nome', form.Nome.value);
-  fd.append('Comercio', form.Comercio.value);
-  fd.append('WhatsApp', form.WhatsApp.value);
-  fd.append('Estilo', estiloField.value);
-  fd.append('Plano', estiloField.value === 'Pronto' ? 'Básico' : 'Personalizado');
-  fd.append('Valor', estiloField.value === 'Pronto' ? 'R$ 14,50' : 'R$ 39,40');
-  fd.append('Tema', temaAtual);
-  fd.append('NichoEscolhido', chosenNiche);
-  fd.append('ModeloEscolhido', chosenModel);
-  try { fetch(cfg.scriptUrl, { method: 'POST', body: fd, keepalive: true }).catch(() => {}); } catch {}
+async function salvarEtapa(etapa) {
+  try {
+    const saved = await CEFSupabase.saveOrder(orderPayload(etapa));
+    userId = saved.order_id;
+  } catch (error) {
+    console.warn('Não foi possível salvar o progresso:', error);
+  }
 }
 
 function showStep() {
@@ -186,11 +197,11 @@ function renderCardBack(card){
   const slides = basic ? [1,2,3].map(n => ({
     label:`Modelo ${String(n).padStart(2,'0')}`,
     id:`${chosenNiche}-${String(n).padStart(2,'0')}`,
-    image:`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.jpg`
+    image:`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`
   })) : [1,2,3].map(n=>({
     label:`Transformação ${n}`,
-    photo:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-foto.jpg`,
-    sticker:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-mascote.jpg`
+    photo:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-foto.webp`,
+    sticker:`assets/personalizados/exemplo-${String(n).padStart(2,'0')}-mascote.webp`
   }));
   const note=document.createElement('div');note.className='offer-back-note';
   note.textContent=basic?'Nicho: '+chosenNiche.replaceAll('-',' '):'3 exemplos: foto original em cima e figurinha criada embaixo.';
@@ -255,17 +266,12 @@ form.addEventListener('submit', async e => {
   if (isBasic() && !chosenModel){alert('Selecione um modelo.');goTo(1,false);return;}
   if (!form.checkValidity()) { form.reportValidity(); return; }
 
-  const cfg = window.SHEETS_CONFIG || {};
-  const missing = !cfg.scriptUrl || String(cfg.scriptUrl).includes('COLE_');
-  if (missing) { alert('O envio ainda não foi configurado. Cole a URL do Apps Script em js/sheets-config.js.'); return; }
-
-  // Não usar o checkout antigo de R$ 47 para ofertas com preços diferentes.
-  const checkout = isBasic() ? cfg.kiwifyCheckoutProntoUrl : cfg.kiwifyCheckoutPersonalizadoUrl;
+  const cfg = window.CHECKOUT_CONFIG || {};
+  const checkout = isBasic() ? cfg.basico : cfg.personalizado;
   if (!checkout || !/^https:\/\//.test(checkout)) {
     alert('Este pacote ainda não tem um link de pagamento configurado. Entre em contato com o suporte para concluir a compra.');
     return;
   }
-  if (!userId) userId = CEF.gerarUserId();
   const nome = form.Nome.value, comercio = form.Comercio.value, whatsappVal = form.WhatsApp.value, estilo = estiloField.value;
 
   CEF.showLoading([
@@ -275,23 +281,8 @@ form.addEventListener('submit', async e => {
   ]);
 
   try {
-    const fd = new FormData();
-    fd.append('acao', 'criar_lead');
-    fd.append('Etapa', '3');
-    fd.append('UserId', userId);
-    fd.append('Nome', nome);
-    fd.append('Comercio', comercio);
-    fd.append('WhatsApp', whatsappVal);
-    fd.append('Estilo', estilo);
-    fd.append('Plano', isBasic() ? 'Básico' : 'Personalizado');
-    fd.append('Valor', isBasic() ? 'R$ 14,50' : 'R$ 39,40');
-    fd.append('Tema', temaAtual);
-    fd.append('NichoEscolhido', chosenNiche);
-    fd.append('ModeloEscolhido', chosenModel);
-
-    const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
-    const data = await res.json().catch(() => ({ ok: res.ok }));
-    if (!data.ok) throw new Error(data.error || 'Falha ao registrar o pedido.');
+    const savedOrder = await CEFSupabase.saveOrder(orderPayload(3));
+    userId = savedOrder.order_id;
 
     CEF.clearAll();
     CEF.setLead({ userId, nome, comercio, whatsapp: whatsappVal, estilo, plano: isBasic() ? 'Básico' : 'Personalizado', valor: isBasic() ? 'R$ 14,50' : 'R$ 39,40', tema: temaAtual, nicho: chosenNiche, modelo: chosenModel });
@@ -299,6 +290,7 @@ form.addEventListener('submit', async e => {
 
     const numeroLimpo = whatsappVal.replace(/\D/g, '');
     const params = new URLSearchParams({ name: nome, phone: numeroLimpo, s1: userId });
+    sessionStorage.removeItem('cef_landing_order_active');
     window.location.href = `${checkout}${checkout.includes('?') ? "&" : "?"}${params.toString()}`;
   } catch (err) {
     console.error(err);

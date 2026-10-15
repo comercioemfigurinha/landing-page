@@ -62,7 +62,7 @@
 <main class="success-page">
   <div class="success-wrap">
     <div class="success-header">
-      <img src="assets/logo.png" alt="Comércio em Figurinha">
+      <img src="assets/logo.webp" alt="Comércio em Figurinha">
       <h1>Pagamento confirmado! <span class="celebration">✓</span></h1>
       <p>Falta só um passo para colocarmos suas figurinhas em produção.</p>
     </div>
@@ -131,7 +131,9 @@
 
 <div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
 
-<script src="js/sheets-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-client.js"></script>
 <script src="js/progress.js"></script>
 <script>
 const lookupBox = document.querySelector('#lookupBox');
@@ -147,7 +149,7 @@ const basicPackageBox = document.querySelector('#basicPackageBox');
 const finalSteps = document.querySelector('#finalSteps');
 const defaults = ['Muito Obrigado.','Já vamos te atender.','PIX recebido!','Só um momento...','Pedido recebido!','Volte sempre!','Boa noite!','Saiu para entrega!','Obrigado pela preferência.'];
 
-document.querySelector('#whatsSupportLink').href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
+document.querySelector('#whatsSupportLink').href = (window.CHECKOUT_CONFIG||{}).whatsappSuporte || '#';
 
 function montarFrases() {
   document.querySelector('#phrasesList').innerHTML = defaults.map((x,i)=>`<label class="phrase-row"><b>${i+1}</b><input name="frase_${i+1}" value="${x}" aria-label="Frase ${i+1}"><span>✎</span></label>`).join('');
@@ -180,7 +182,7 @@ function nomeModelo(modelo) {
   return m ? `Modelo ${m[1]}` : 'Modelo escolhido';
 }
 function mostrarContatoSuave() {
-  const href = (window.SHEETS_CONFIG||{}).whatsappSuporte || '#';
+  const href = (window.CHECKOUT_CONFIG||{}).whatsappSuporte || '#';
   return `<p class="soft-contact">Se precisar falar conosco, nos chame pelo WhatsApp: <a href="${href}" target="_blank" rel="noopener">abrir conversa</a>.</p>`;
 }
 function renderSuccessTracker(lead) {
@@ -217,7 +219,7 @@ function iniciarFormulario(lead) {
     const modelo = lead.modelo || lead.ModeloEscolhido || '';
     const modeloNumero = String(modelo).match(/-(\d{2})$/)?.[1] || '01';
     basicPackageBox.hidden = false;
-    basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.jpg" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
+    basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.webp" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
     renderFinalSteps([
       { icon: 'fa-solid fa-layer-group', title: 'Pacote escolhido', text: 'Você escolheu 1 pacote pronto com 9 figurinhas.' },
       { icon: 'fa-solid fa-clock', title: 'Prazo de contato', text: 'Em até 24 horas entraremos em contato no WhatsApp.' },
@@ -233,37 +235,14 @@ function iniciarFormulario(lead) {
 }
 
 document.querySelector('#lookupBtn').addEventListener('click', async () => {
-  const cfg = window.SHEETS_CONFIG || {};
-  const numero = document.querySelector('#lookupWhatsapp').value.replace(/\D/g,'');
   const erro = document.querySelector('#lookupError');
-  erro.textContent = '';
-  if (!numero) { erro.textContent = 'Informe um WhatsApp válido.'; return; }
-  CEF.showLoading('Procurando seu pedido...');
-  try {
-    const res = await fetch(`${cfg.scriptUrl}?acao=buscar_por_whatsapp&whatsapp=${encodeURIComponent(numero)}`);
-    const data = await res.json();
-    CEF.hideLoading();
-    if (!data.ok) { erro.textContent = 'Não encontramos nenhum pedido com esse WhatsApp. Confira o número ou fale com a gente no suporte.'; return; }
-    iniciarFormulario({
-      userId: data.pedido.UserId,
-      nome: data.pedido.Nome,
-      comercio: data.pedido.Comercio,
-      estilo: data.pedido.Estilo,
-      plano: data.pedido.Plano,
-      nicho: data.pedido.NichoEscolhido,
-      modelo: data.pedido.ModeloEscolhido
-    });
-  } catch (err) {
-    CEF.hideLoading();
-    erro.textContent = 'Não foi possível buscar agora. Tente novamente.';
-  }
+  erro.innerHTML = 'Para proteger seus dados, a recuperação somente pelo número foi desativada. Abra esta página no mesmo navegador usado na compra ou <a href="'+((window.CHECKOUT_CONFIG||{}).whatsappSuporte||'#')+'" target="_blank" rel="noopener">fale conosco pelo WhatsApp</a>.';
 });
 
 postForm.addEventListener('submit', async e => {
   e.preventDefault();
   syncPhrases();
   if (!postForm.checkValidity()) { postForm.reportValidity(); return; }
-  const cfg = window.SHEETS_CONFIG || {};
   const lead = CEF.getLead();
   if (!lead.userId) { alert('Não encontramos seu pedido. Recarregue a página e informe seu WhatsApp.'); return; }
 
@@ -276,29 +255,22 @@ postForm.addEventListener('submit', async e => {
   try {
     const foto = fotoInput.files[0];
     const logo = logoInput.files[0];
-    const fd = new FormData();
-    fd.append('acao', 'finalizar');
-    fd.append('UserId', lead.userId);
-    fd.append('Comercio', lead.comercio || '');
-    fd.append('Frases', document.querySelector('#frasesField').value);
-    fd.append('EstiloTexto', document.querySelector('input[name="EstiloTexto"]:checked')?.value || '');
-    fd.append('CorPrincipal', document.querySelector('#corPrincipal').value);
-    fd.append('TemSegundaCor', document.querySelector('input[name="TemSegundaCor"]:checked')?.value || 'Não');
-    fd.append('SegundaCor', document.querySelector('#segundaCor').value);
-    fd.append('Observacoes', document.querySelector('#observacoes').value);
-    if (foto) {
-      fd.append('FotoBase64', await CEF.fileToBase64(foto));
-      fd.append('FotoName', foto.name);
-      fd.append('FotoType', foto.type || 'image/png');
-    }
-    if (logo) {
-      fd.append('LogoBase64', await CEF.fileToBase64(logo));
-      fd.append('LogoName', logo.name);
-      fd.append('LogoType', logo.type || 'image/png');
-    }
-    const res = await fetch(cfg.scriptUrl, { method: 'POST', body: fd });
-    const data = await res.json().catch(() => ({ ok: res.ok }));
-    if (!data.ok) throw new Error(data.error || 'Falha ao enviar.');
+    const [photoPath, logoPath] = await Promise.all([
+      foto ? CEFSupabase.uploadOrderImage(foto, 'foto') : Promise.resolve(null),
+      logo ? CEFSupabase.uploadOrderImage(logo, 'logo') : Promise.resolve(null)
+    ]);
+    await CEFSupabase.saveOrder({
+      form_step: 4,
+      phrases: [...document.querySelectorAll('.phrase-row input')].map(input => input.value.trim()),
+      text_style: document.querySelector('input[name="EstiloTexto"]:checked')?.value || '',
+      primary_color: document.querySelector('#corPrincipal').value,
+      has_secondary_color: document.querySelector('input[name="TemSegundaCor"]:checked')?.value === 'Sim',
+      secondary_color: document.querySelector('#segundaCor').value,
+      notes: document.querySelector('#observacoes').value.trim(),
+      photo_path: photoPath,
+      logo_path: logoPath,
+      service_status: 'em_aprovacao'
+    });
 
     CEF.setProgress({ dados: true, estilo: true, pagamento: true, material: true });
     renderSuccessTracker(lead);
@@ -319,9 +291,27 @@ postForm.addEventListener('submit', async e => {
 });
 
 // ---- Inicialização: tenta usar o que já está salvo neste navegador ----
-(function init() {
+(async function init() {
   const progresso = CEF.getProgress();
-  const lead = CEF.getLead();
+  let lead = CEF.getLead();
+  try {
+    const order = await CEFSupabase.getOrder();
+    if (order) {
+      lead = {
+        userId: order.id,
+        nome: order.customer_name,
+        comercio: order.business_name,
+        whatsapp: order.whatsapp,
+        estilo: order.plan === 'basico' ? 'Pronto' : 'Personalizado',
+        plano: order.plan === 'basico' ? 'Básico' : 'Personalizado',
+        nicho: order.niche,
+        modelo: order.package_model
+      };
+      CEF.setLead(lead);
+    }
+  } catch (error) {
+    console.warn('Não foi possível restaurar o pedido:', error);
+  }
 
   if (lead.userId && lead.estilo === 'Pronto') {
     iniciarFormulario(lead);
