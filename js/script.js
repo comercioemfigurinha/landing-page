@@ -39,6 +39,7 @@ function renderModels(){
 }
 document.querySelector('#closeLightbox').onclick=()=>document.querySelector('#imageLightbox').hidden=true;
 document.querySelector('#imageLightbox').onclick=e=>{if(e.target.id==='imageLightbox')e.currentTarget.hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelector('#imageLightbox').hidden=true});
 function isBasic(){return estiloField.value === 'Pronto';}
 function updateContactFields(){
   const basic = isBasic();
@@ -250,7 +251,11 @@ function renderCardBack(card){
 
 // ---- FAQ ----
 document.querySelectorAll('.faq-item').forEach(item => {
-  item.querySelector('.faq-q').addEventListener('click', () => item.classList.toggle('open'));
+  const button = item.querySelector('.faq-q');
+  button.addEventListener('click', () => {
+    const open = item.classList.toggle('open');
+    button.setAttribute('aria-expanded', String(open));
+  });
 });
 
 function review(){
