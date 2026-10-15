@@ -126,7 +126,11 @@
       'O acesso foi liberado, mas os pedidos demoraram demais para carregar.'
     );
     if (error) throw error;
-    orders = data || [];
+    orders = (data || []).filter(order => {
+      const phone = String(order.whatsapp || '').replace(/\D/g, '');
+      const hasContact = String(order.customer_name || '').trim() && phone.length >= 10;
+      return order.payment_status === 'pago' || hasContact;
+    });
     renderFilters();
     await render();
   }
@@ -143,6 +147,32 @@
       renderFilters();
       render();
     });
+  }
+
+  function checkoutUrl(order) {
+    const cfg = window.CHECKOUT_CONFIG || {};
+    const base = order.plan === 'basico' ? cfg.basico : cfg.personalizado;
+    if (!base) return '';
+    const params = new URLSearchParams({
+      name: order.customer_name || '',
+      phone: String(order.whatsapp || '').replace(/\D/g, ''),
+      s1: order.id
+    });
+    return `${base}${base.includes('?') ? '&' : '?'}${params.toString()}`;
+  }
+
+  async function copyCheckout(order) {
+    const url = checkoutUrl(order);
+    if (!url) {
+      alert('Link de checkout não configurado para este plano.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('Link do checkout copiado. Agora você pode enviá-lo ao cliente.');
+    } catch (_) {
+      prompt('Copie o link do checkout:', url);
+    }
   }
 
   async function assetUrl(path) {
@@ -177,6 +207,7 @@
         ${phrases ? `<div class="frases">${esc(phrases)}</div>` : ''}
         <div class="card-links">
           ${phone ? `<a class="whats" href="https://wa.me/55${phone}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+          <button data-checkout class="checkout-link"><i class="fa-solid fa-link"></i> Copiar checkout</button>
           ${urls[index].photo ? `<a href="${esc(urls[index].photo)}" target="_blank" rel="noopener">Ver foto</a>` : ''}
           ${urls[index].logo ? `<a href="${esc(urls[index].logo)}" target="_blank" rel="noopener">Ver logo</a>` : ''}
           <button data-delete class="btn-danger">Excluir</button>
@@ -184,7 +215,9 @@
       </article>`;
     }).join('');
     grid.querySelectorAll('.card').forEach(card => {
+      const order = orders.find(item => item.id === card.dataset.id);
       card.querySelector('[data-service]').onchange = event => updateOrder(card.dataset.id, { service_status: event.target.value });
+      card.querySelector('[data-checkout]').onclick = () => copyCheckout(order);
       card.querySelector('[data-delete]').onclick = () => deleteOrder(card.dataset.id);
     });
   }
