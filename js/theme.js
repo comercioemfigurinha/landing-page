@@ -63,17 +63,11 @@ window.CEFTheme={csvUrl:CSV_URL,jsUrl:JS_URL,loadSite:function(){return loadSite
 window.addEventListener('message',function(e){if(e.data&&e.data.cefTema)apply(e.data.cefTema)});
 var nome=slug(new URLSearchParams(location.search).get('tema'));
 if(!nome||window.CEF_EDITOR)return;
-var root=document.documentElement,hide=document.createElement('style');
-hide.textContent='html.tema-loading body{visibility:hidden}';document.head.appendChild(hide);
-root.classList.add('tema-loading');
-var done=function(){root.classList.remove('tema-loading')};
-setTimeout(done,1500);
 var ready=new Promise(function(r){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r):r()});
 function acha(l){return (l||[]).filter(function(x){return slug(x.tema)===nome})[0]}
 var info={};
 var dados=loadSite().then(function(x){info.via=x.via;info.total=x.l.length;return acha(x.l)}).catch(function(){info.erro=1});
 Promise.all([dados,ready]).then(function(a){if(a[0])apply(a[0]);else info.naoachou=1}).catch(function(){}).then(function(){
-  done();
   if(new URLSearchParams(location.search).get('debug')){var d=document.createElement('div');d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#111;color:#fff;font:13px/1.4 system-ui;padding:10px 12px;border-radius:10px';
     d.textContent='Tema "'+nome+'": '+(info.erro?'não consegui ler temas.csv nem temas.js':info.naoachou?'NÃO está nos temas do site':'aplicado')+(info.via?' | lido de '+info.via+' ('+info.total+' tema(s))':'')+' | '+CSV_URL;
     document.body.appendChild(d)}});
