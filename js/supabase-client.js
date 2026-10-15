@@ -33,7 +33,9 @@
     localStorage.removeItem('cef_supabase_order');
   }
 
-  async function saveOrder(payload) {
+  let saveQueue = Promise.resolve();
+
+  async function saveOrderNow(payload) {
     const session = getOrderSession();
     const accessToken = session?.accessToken || randomToken();
     const { data, error } = await client.rpc('save_public_order', {
@@ -45,6 +47,12 @@
     const saved = Array.isArray(data) ? data[0] : data;
     setOrderSession(saved.order_id, accessToken);
     return saved;
+  }
+
+  function saveOrder(payload) {
+    const operation = saveQueue.catch(() => {}).then(() => saveOrderNow(payload));
+    saveQueue = operation;
+    return operation;
   }
 
   async function getOrder() {
