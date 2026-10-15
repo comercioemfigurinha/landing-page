@@ -1,4 +1,9 @@
 (function () {
+  if (!window.CEFSupabase) {
+    document.querySelector('#gateError').textContent =
+      'Supabase não carregou. Verifique sua conexão/bloqueadores e js/supabase-config.js (veja o Console, F12).';
+    return;
+  }
   const db = CEFSupabase.client;
   const gate = document.querySelector('#gate');
   const panel = document.querySelector('#painel');
@@ -59,11 +64,15 @@
       10000,
       'A verificação de administrador demorou demais. Confira a função is_admin no Supabase.'
     );
-    if (error) throw new Error(`Não foi possível verificar o administrador: ${error.message}`);
+    if (error) {
+      console.error('[admin] erro em is_admin:', error);
+      throw new Error(`Não foi possível verificar o administrador: ${error.message}`);
+    }
     if (data !== true) {
       await db.auth.signOut();
       throw new Error('Este usuário não tem permissão de administrador. Confira se o usuário está na tabela public.admins.');
     }
+    showLoginMessage('');
     return true;
   }
 
@@ -78,7 +87,14 @@
         15000,
         'O login demorou demais. Verifique sua conexão e tente novamente.'
       );
-      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'E-mail ou senha inválidos.' : error.message);
+      if (error) {
+        console.error('[admin] erro de login:', error);
+        const map = {
+          'Invalid login credentials': 'E-mail ou senha inválidos.',
+          'Email not confirmed': 'E-mail não confirmado. No Supabase: Authentication > Users > confirme o usuário.'
+        };
+        throw new Error(map[error.message] || error.message);
+      }
       await openPanel();
     } catch (err) {
       panel.hidden = true;
