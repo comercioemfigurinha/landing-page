@@ -131,11 +131,10 @@ function goTo(n, flip) {
 
 nextBtn.addEventListener('click', () => {
   if (!validStep()) return;
-  if (current === 0) { CEF.setProgress({ estilo: true }); salvarEtapa(1); }
+  if (current === 0) { CEF.setProgress({ estilo: true }); }
   if (current === 1) {
     if(estiloField.value==='Pronto' && !chosenModel){alert('Escolha um dos 3 modelos antes de continuar.');return;}
     CEF.setProgress({ dados: true });
-    salvarEtapa(2);
     // Meta Pixel: evento padrão "Adicionar à lista de desejos" (AddToWishlist), disparado ao clicar
     // em "Continuar" na etapa 2 (escolha do estilo). Usado como sinal de pré-cadastro.
     try { if (typeof fbq === 'function') fbq('track', 'AddToWishlist', { content_name: 'PreCadastro', content_category: estiloField.value }); } catch {}
@@ -243,7 +242,7 @@ function renderCardBack(card){
   select.onclick=()=>{
     const input=card.querySelector('input');input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}));
     closeCard(card);
-    CEF.setProgress({estilo:true,dados:true});salvarEtapa(1);salvarEtapa(2);
+    CEF.setProgress({ estilo: true });
     goTo(2,true);
   };
   back.appendChild(select);
