@@ -29,13 +29,40 @@
     return value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—';
   }
 
+  function withTimeout(request, milliseconds, message) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message)), milliseconds);
+    });
+    return Promise.race([Promise.resolve(request), timeout]).finally(() => clearTimeout(timer));
+  }
+
+  function showLoginMessage(message) {
+    errorBox.textContent = message;
+  }
+
   async function requireAdmin() {
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) return false;
-    const { data, error } = await db.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
-    if (error || !data) {
+    showLoginMessage('Verificando sua sessão...');
+    const { data: { session } } = await withTimeout(
+      db.auth.getSession(),
+      10000,
+      'A verificação da sessão demorou demais. Atualize a página e tente novamente.'
+    );
+    if (!session) {
+      showLoginMessage('');
+      return false;
+    }
+
+    showLoginMessage('Verificando permissão de administrador...');
+    const { data, error } = await withTimeout(
+      db.rpc('is_admin'),
+      10000,
+      'A verificação de administrador demorou demais. Confira a função is_admin no Supabase.'
+    );
+    if (error) throw new Error(`Não foi possível verificar o administrador: ${error.message}`);
+    if (data !== true) {
       await db.auth.signOut();
-      throw new Error('Este usuário não tem permissão de administrador.');
+      throw new Error('Este usuário não tem permissão de administrador. Confira se o usuário está na tabela public.admins.');
     }
     return true;
   }
@@ -45,7 +72,12 @@
     loginButton.disabled = true;
     loginButton.textContent = 'Entrando...';
     try {
-      const { error } = await db.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
+      showLoginMessage('Validando e-mail e senha...');
+      const { error } = await withTimeout(
+        db.auth.signInWithPassword({ email: email.value.trim(), password: password.value }),
+        15000,
+        'O login demorou demais. Verifique sua conexão e tente novamente.'
+      );
       if (error) throw new Error(error.message === 'Invalid login credentials' ? 'E-mail ou senha inválidos.' : error.message);
       await openPanel();
     } catch (err) {
@@ -60,14 +92,23 @@
 
   async function openPanel() {
     if (!await requireAdmin()) return;
-    await loadOrders();
     gate.hidden = true;
     panel.hidden = false;
+    try {
+      await loadOrders();
+    } catch (err) {
+      status.textContent = err.message || 'Não foi possível carregar os pedidos.';
+      throw err;
+    }
   }
 
   async function loadOrders() {
     status.textContent = 'Carregando...';
-    const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      db.from('orders').select('*').order('created_at', { ascending: false }),
+      15000,
+      'O acesso foi liberado, mas os pedidos demoraram demais para carregar.'
+    );
     if (error) throw error;
     orders = data || [];
     renderFilters();
