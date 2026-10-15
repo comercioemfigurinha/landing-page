@@ -5,6 +5,7 @@
   const email = document.querySelector('#emailInput');
   const password = document.querySelector('#senhaInput');
   const errorBox = document.querySelector('#gateError');
+  const loginButton = document.querySelector('#entrarBtn');
   const grid = document.querySelector('#grid');
   const status = document.querySelector('#status');
   const filters = document.querySelector('#filters');
@@ -41,17 +42,27 @@
 
   async function signIn() {
     errorBox.textContent = '';
-    const { error } = await db.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
-    if (error) { errorBox.textContent = 'E-mail ou senha inválidos.'; return; }
-    try { await openPanel(); }
-    catch (err) { errorBox.textContent = err.message; }
+    loginButton.disabled = true;
+    loginButton.textContent = 'Entrando...';
+    try {
+      const { error } = await db.auth.signInWithPassword({ email: email.value.trim(), password: password.value });
+      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'E-mail ou senha inválidos.' : error.message);
+      await openPanel();
+    } catch (err) {
+      panel.hidden = true;
+      gate.hidden = false;
+      errorBox.textContent = err.message || 'Não foi possível entrar. Tente novamente.';
+    } finally {
+      loginButton.disabled = false;
+      loginButton.textContent = 'Entrar com segurança';
+    }
   }
 
   async function openPanel() {
     if (!await requireAdmin()) return;
+    await loadOrders();
     gate.hidden = true;
     panel.hidden = false;
-    await loadOrders();
   }
 
   async function loadOrders() {
@@ -149,10 +160,14 @@
     URL.revokeObjectURL(url);
   }
 
-  document.querySelector('#entrarBtn').onclick = signIn;
+  loginButton.onclick = signIn;
   password.addEventListener('keydown', event => { if (event.key === 'Enter') signIn(); });
   document.querySelector('#refreshBtn').onclick = loadOrders;
   document.querySelector('#exportBtn').onclick = exportCsv;
   document.querySelector('#sairBtn').onclick = async () => { await db.auth.signOut(); location.reload(); };
-  openPanel().catch(err => { errorBox.textContent = err.message; });
+  openPanel().catch(err => {
+    panel.hidden = true;
+    gate.hidden = false;
+    errorBox.textContent = err.message || 'Não foi possível carregar o painel.';
+  });
 })();
