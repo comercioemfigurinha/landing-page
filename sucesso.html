@@ -63,7 +63,7 @@
 <main class="success-page">
   <div class="success-wrap">
     <div class="success-header">
-      <img src="assets/logo.webp" alt="Comércio em Figurinha">
+      <img src="assets/logo.webp" alt="Comércio em Figurinha" width="800" height="800" decoding="async">
       <h1>Pagamento confirmado! <span class="celebration">✓</span></h1>
       <p>Falta só um passo para colocarmos suas figurinhas em produção.</p>
     </div>
@@ -220,7 +220,7 @@ function iniciarFormulario(lead) {
     const modelo = lead.modelo || lead.ModeloEscolhido || '';
     const modeloNumero = String(modelo).match(/-(\d{2})$/)?.[1] || '01';
     basicPackageBox.hidden = false;
-    basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.webp" alt="Pacote escolhido"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
+    basicPackageBox.innerHTML = `<img src="assets/pacotes/${nicho}/modelo-${modeloNumero}.webp" alt="Pacote de figurinhas escolhido" width="1254" height="1254" decoding="async"><strong>${nomeModelo(modelo)}</strong><small>${String(nicho).replaceAll('-',' ')}</small>`;
     renderFinalSteps([
       { icon: 'fa-solid fa-layer-group', title: 'Pacote escolhido', text: 'Você escolheu 1 pacote pronto com 9 figurinhas.' },
       { icon: 'fa-solid fa-clock', title: 'Prazo de contato', text: 'Em até 24 horas entraremos em contato no WhatsApp.' },
