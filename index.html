@@ -33,12 +33,12 @@
   fbq('track', 'PageView');
   </script>
   <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=996403330137888&ev=PageView&noscript=1"
+  src="https://www.facebook.com/tr?id=996403330137888&ev=PageView&noscript=1" alt=""
   /></noscript>
   <!-- End Meta Pixel Code -->
   <header class="topbar">
     <a class="brand" href="#inicio" aria-label="Comércio em Figurinha - início">
-      <img src="assets/logo.webp" alt="Comércio em Figurinha">
+      <img src="assets/logo.webp" alt="Comércio em Figurinha" width="800" height="800" decoding="async">
     </a>
     <a class="top-cta" href="#montar">Quero minhas figurinhas</a>
   </header>
@@ -142,7 +142,7 @@
             <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
           </div>
 <button class="submit" type="submit">Seguir para pagamento →</button><p class="form-note">Ao continuar, você concorda com o contato sobre seu pedido. <a href="regulamento.html#cancelamento" target="_blank">Regulamento e cancelamento</a>.</p></section>
-        <div id="imageLightbox" class="image-lightbox" hidden><button type="button" id="closeLightbox" aria-label="Fechar imagem">×</button><img id="lightboxImg" alt="Prévia ampliada do pacote"></div>
+        <div id="imageLightbox" class="image-lightbox" hidden><button type="button" id="closeLightbox" aria-label="Fechar imagem">×</button><img id="lightboxImg" alt="Prévia ampliada do pacote" width="1254" height="1254" decoding="async"></div>
         <div class="wizard-actions"><button type="button" class="back" id="backBtn" hidden>← Voltar</button><button type="button" class="next" id="nextBtn">Continuar →</button></div>
       </form>
     </section>
@@ -166,12 +166,13 @@
     </section>
   </main>
 
-  <footer><img src="assets/logo.webp" alt=""><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
+  <footer><img src="assets/logo.webp" alt="" width="800" height="800" loading="lazy" decoding="async"><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
 
   <div id="cefLoading"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
 
-  <!-- Iframe para carregar o botão flutuante -->
-  <iframe src="whatsapp-icon.html" style="position: fixed; bottom: 0px; right: 0px; width: 80px; height: 80px; border: none; z-index: 9999; scrolling: no; overflow: hidden;"></iframe>
+  <a class="whatsapp-float-site" href="https://wa.me/5518996961409" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp">
+    <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+  </a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
