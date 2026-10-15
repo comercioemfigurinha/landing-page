@@ -33,7 +33,7 @@ function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenMod
 function renderModels(){
   persistChoice();
   temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
-  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
+  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
   document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
   document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>{document.querySelector('#lightboxImg').src=b.dataset.path;document.querySelector('#imageLightbox').hidden=false});
 }
@@ -273,11 +273,7 @@ form.addEventListener('submit', async e => {
   }
   const nome = form.Nome.value, comercio = form.Comercio.value, whatsappVal = form.WhatsApp.value, estilo = estiloField.value;
 
-  CEF.showLoading([
-    'Preparando seu pedido...',
-    'Isso pode levar alguns segundos...',
-    'Quase lá, não feche esta página...'
-  ]);
+  CEF.showLoading('Preparando seu checkout...');
 
   try {
     const savedOrder = await CEFSupabase.saveOrder(orderPayload(3));
