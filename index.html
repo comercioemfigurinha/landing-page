@@ -221,7 +221,6 @@
             <label><span>Seu WhatsApp *</span><input required name="WhatsApp" id="whatsapp" inputmode="tel" placeholder="(00) 00000-0000"></label>
           </div>
 <button class="submit" type="submit">Seguir para pagamento →</button><p class="form-note">Ao continuar, você concorda com o contato sobre seu pedido. <a href="regulamento.html#cancelamento" target="_blank">Regulamento e cancelamento</a>.</p></section>
-        <div id="imageLightbox" class="image-lightbox" role="dialog" aria-modal="true" aria-label="Prévia ampliada do pacote" hidden><button type="button" id="closeLightbox" aria-label="Fechar imagem">×</button><img id="lightboxImg" alt="Prévia ampliada do pacote" width="1254" height="1254" decoding="async"></div>
         <div class="wizard-actions"><button type="button" class="back" id="backBtn" hidden>← Voltar</button><button type="button" class="next" id="nextBtn">Continuar →</button></div>
       </form>
     </section>
@@ -246,6 +245,8 @@
   </main>
 
   <footer><img src="assets/logo.webp" alt="" width="800" height="auto" loading="lazy" decoding="async"><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
+
+  <dialog id="imageLightbox" class="image-lightbox" aria-label="Prévia ampliada do pacote"><div class="lightbox-content"><button type="button" id="closeLightbox" aria-label="Fechar imagem">Fechar <span aria-hidden="true">×</span></button><img id="lightboxImg" alt="Prévia ampliada do pacote" decoding="async"></div></dialog>
 
   <div id="cefLoading" role="status" aria-live="polite" aria-busy="true"><div class="loading-card"><div class="loading-spin"></div><div class="loading-text">Só um instante...</div></div></div>
 
