@@ -35,11 +35,53 @@ function renderModels(){
   temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
   document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
   document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
-  document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>{document.querySelector('#lightboxImg').src=b.dataset.path;document.querySelector('#imageLightbox').hidden=false});
+  document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>openLightbox(b.dataset.path));
 }
-document.querySelector('#closeLightbox').onclick=()=>document.querySelector('#imageLightbox').hidden=true;
-document.querySelector('#imageLightbox').onclick=e=>{if(e.target.id==='imageLightbox')e.currentTarget.hidden=true};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelector('#imageLightbox').hidden=true});
+const lightbox = document.querySelector('#imageLightbox');
+const lightboxImg = document.querySelector('#lightboxImg');
+const closeLightboxBtn = document.querySelector('#closeLightbox');
+let lightboxTrigger;
+let lightboxClosing = false;
+function openLightbox(src) {
+  if (lightboxClosing) return;
+  lightboxImg.src = src;
+  if (lightbox.open) return;
+  lightboxTrigger = document.activeElement;
+  history.pushState({...history.state, cefImageLightbox: true}, '', location.href);
+  lightbox.showModal();
+  document.documentElement.classList.add('lightbox-open');
+  closeLightboxBtn.focus({preventScroll: true});
+}
+function hideLightbox() {
+  lightbox.close();
+  document.documentElement.classList.remove('lightbox-open');
+  lightboxTrigger?.focus({preventScroll: true});
+}
+function closeLightbox() {
+  if (!lightbox.open || lightboxClosing) return;
+  hideLightbox();
+  if (history.state?.cefImageLightbox) {
+    lightboxClosing = true;
+    history.back();
+  }
+}
+closeLightboxBtn.onclick = closeLightbox;
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox) closeLightbox();
+});
+lightbox.addEventListener('cancel', e => {
+  e.preventDefault();
+  closeLightbox();
+});
+window.addEventListener('popstate', () => {
+  lightboxClosing = false;
+  if (history.state?.cefImageLightbox) {
+    if (!lightbox.open) {
+      lightbox.showModal();
+      document.documentElement.classList.add('lightbox-open');
+    }
+  } else if (lightbox.open) hideLightbox();
+});
 function isBasic(){return estiloField.value === 'Pronto';}
 function updateContactFields(){
   const basic = isBasic();
@@ -235,7 +277,7 @@ function renderCardBack(card){
   carousel.addEventListener('touchend',e=>{const diff=e.changedTouches[0].clientX-touchStart;if(Math.abs(diff)>35)activate(active+(diff<0?1:-1))},{passive:true});
   carousel.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();activate(active+1)}if(e.key==='ArrowLeft'){e.preventDefault();activate(active-1)}});
   if(basic){
-    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>{document.querySelector('#lightboxImg').src=slides[active].image;document.querySelector('#imageLightbox').hidden=false};back.appendChild(zoom);
+    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>openLightbox(slides[active].image);back.appendChild(zoom);
   }
   if(!basic){const more=document.createElement('button');more.type='button';more.className='flip-other';more.textContent='Ver mais exemplos →';more.onclick=()=>activate(active+1);back.appendChild(more)}
   activate(active);
