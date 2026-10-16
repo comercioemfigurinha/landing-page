@@ -33,17 +33,18 @@ function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenMod
 function renderModels(){
   persistChoice();
   temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
-  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" onerror="this.style.opacity='.15'"><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
+  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><span class="basic-image-protected"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" draggable="false" onerror="this.style.opacity='.15'"></span><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
   document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
-  document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>openLightbox(b.dataset.path));
+  document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>openLightbox(b.dataset.path, true));
 }
 const lightbox = document.querySelector('#imageLightbox');
 const lightboxImg = document.querySelector('#lightboxImg');
 const closeLightboxBtn = document.querySelector('#closeLightbox');
 let lightboxTrigger;
 let lightboxClosing = false;
-function openLightbox(src) {
+function openLightbox(src, protectBasic = false) {
   if (lightboxClosing) return;
+  lightbox.classList.toggle('basic-protected', protectBasic);
   lightboxImg.src = src;
   if (lightbox.open) return;
   lightboxTrigger = document.activeElement;
@@ -195,6 +196,14 @@ whatsapp.addEventListener('input', e => {
   e.target.value = v;
 });
 
+// Dificulta copiar ou arrastar apenas as prévias protegidas do plano básico.
+document.addEventListener('contextmenu', event => {
+  if (event.target.closest('.basic-image-protected, .image-lightbox.basic-protected')) event.preventDefault();
+});
+document.addEventListener('dragstart', event => {
+  if (event.target.closest('.basic-image-protected, .image-lightbox.basic-protected')) event.preventDefault();
+});
+
 // ---- Escolha do pacote ----
 document.querySelectorAll('.offer-card input').forEach(input => {
   input.addEventListener('change', () => {
@@ -254,7 +263,7 @@ function renderCardBack(card){
   if(active<0)active=0;
   slides.forEach((slide,i)=>{
     const item=document.createElement('button');item.type='button';item.className='flip-slide';
-    item.innerHTML=basic?`<img src="${slide.image}" alt="${slide.label}" loading="lazy"><span>${slide.label}</span>`:`<div class="premium-pair"><div><img src="${slide.photo}" alt="Foto original ${i+1}" loading="lazy"><small>Foto original</small></div><div><img src="${slide.sticker}" alt="Figurinha criada ${i+1}" loading="lazy"><small>Figurinha criada</small></div></div><span>${slide.label}</span>`;
+    item.innerHTML=basic?`<span class="basic-image-protected flip-basic-image"><img src="${slide.image}" alt="${slide.label}" loading="lazy" decoding="async" draggable="false"></span><span>${slide.label}</span>`:`<div class="premium-pair"><div><img src="${slide.photo}" alt="Foto original ${i+1}" loading="lazy"><small>Foto original</small></div><div><img src="${slide.sticker}" alt="Figurinha criada ${i+1}" loading="lazy"><small>Figurinha criada</small></div></div><span>${slide.label}</span>`;
     item.querySelectorAll('img').forEach(img=>img.addEventListener('error',e=>{e.target.style.opacity='.2'}));
     item.addEventListener('click',()=>{if(i!==active){activate(i);return;}if(basic){chosenModel=slide.id;renderModels();activate(i)}else{activate(i)}});
     track.appendChild(item);
@@ -277,7 +286,7 @@ function renderCardBack(card){
   carousel.addEventListener('touchend',e=>{const diff=e.changedTouches[0].clientX-touchStart;if(Math.abs(diff)>35)activate(active+(diff<0?1:-1))},{passive:true});
   carousel.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();activate(active+1)}if(e.key==='ArrowLeft'){e.preventDefault();activate(active-1)}});
   if(basic){
-    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>openLightbox(slides[active].image);back.appendChild(zoom);
+    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>openLightbox(slides[active].image, true);back.appendChild(zoom);
   }
   if(!basic){const more=document.createElement('button');more.type='button';more.className='flip-other';more.textContent='Ver mais exemplos →';more.onclick=()=>activate(active+1);back.appendChild(more)}
   activate(active);
