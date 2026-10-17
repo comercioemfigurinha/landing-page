@@ -286,7 +286,7 @@ function renderCardBack(card){
   carousel.addEventListener('touchend',e=>{const diff=e.changedTouches[0].clientX-touchStart;if(Math.abs(diff)>35)activate(active+(diff<0?1:-1))},{passive:true});
   carousel.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();activate(active+1)}if(e.key==='ArrowLeft'){e.preventDefault();activate(active-1)}});
   if(basic){
-    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='⛶ Ampliar exemplo';zoom.onclick=()=>openLightbox(slides[active].image, true);back.appendChild(zoom);
+    const zoom=document.createElement('button');zoom.type='button';zoom.className='flip-other';zoom.textContent='Ampliar Imagem <i class="fa-solid fa-up-right-and-down-left-from-center"></i> ';zoom.onclick=()=>openLightbox(slides[active].image, true);back.appendChild(zoom);
   }
   if(!basic){const more=document.createElement('button');more.type='button';more.className='flip-other';more.textContent='Ver mais exemplos →';more.onclick=()=>activate(active+1);back.appendChild(more)}
   activate(active);
