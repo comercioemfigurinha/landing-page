@@ -211,7 +211,7 @@
 .offer-back .flip-model img{display:block;width:100%;aspect-ratio:1;object-fit:contain;border-radius:6px;background:#f3f4f6}
 .offer-back .flip-model span{font-size:10px;font-weight:700;display:block;margin:4px 0}
 .offer-back .flip-model .flip-zoom{font-size:10px;text-decoration:underline;display:block}
-.offer-back .flip-other{border:1px solid var(--line);background:white;border-radius:9px;padding:9px;cursor:pointer}
+.offer-back .flip-other{border:1px solid var(--line);background:#413838;border-radius:9px;padding:9px;cursor:pointer;color:#fff; font-weight:700;}
 .offer-back .flip-niches{display:flex;flex-wrap:wrap;gap:5px}
 .offer-back .flip-niches[hidden]{display:none}
 .offer-back .flip-niches button{border:1px solid var(--line);background:white;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:11px;text-transform:capitalize}
