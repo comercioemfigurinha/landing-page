@@ -89,11 +89,16 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://connect.facebook.net">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="css/style.css?v=2.0">
   <script src="js/theme.js"></script>
   <link rel="icon" href="icone.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
   
   <!-- <script async src="https://t.contentsquare.net/uxa/bfabbe55c52e9.js"></script> -->
 </head>
@@ -117,7 +122,7 @@
   <!-- End Meta Pixel Code -->
   <header class="topbar">
     <a class="brand" href="#inicio" aria-label="Comércio em Figurinha - início">
-      <img src="assets/logo.webp" alt="Comércio em Figurinha" width="800" height="800" decoding="async">
+      <img src="assets/logo-sm.webp" alt="Comércio em Figurinha" width="240" height="240" decoding="async" fetchpriority="high">
     </a>
     <a class="top-cta" href="#montar">Quero minhas figurinhas</a>
   </header>
@@ -213,7 +218,7 @@
         <section class="form-step" data-step="2"><div class="step-copy"><span>PASSO 2</span><h3 id="choiceHeading">Escolha seu modelo</h3><p id="choiceDesc">Selecione um pacote com 9 figurinhas. Toque na lupa para ampliar.</p></div>
           <div id="basicPicker"><div id="temaInfo" class="tema-info"></div><div id="modelGrid" class="model-grid"></div>
 </div>
-          <div id="customPreview" hidden><p>Seu mascote poderá ser criado com base na foto do dono(a) ou em um personagem fictício que represente a marca.</p><div class="custom-images"><div><img src="assets/personalizados/exemplo-01-foto.webp" alt="Foto de referência" onerror="this.style.display='none'"><span>Foto original</span></div><div><img src="assets/personalizados/exemplo-01-mascote.webp" alt="Figurinha personalizada" onerror="this.style.display='none'"><span>Figurinha criada</span></div></div><p>Após o pagamento, combinaremos as fotos, frases, cores e estilos para as suas figurinhas!</p></div>
+          <div id="customPreview" hidden><p>Seu mascote poderá ser criado com base na foto do dono(a) ou em um personagem fictício que represente a marca.</p><div class="custom-images"><div><img src="assets/personalizados/exemplo-01-foto-thumb.webp" alt="Foto de referência" loading="lazy" decoding="async" onerror="this.style.display='none'"><span>Foto original</span></div><div><img src="assets/personalizados/exemplo-01-mascote-thumb.webp" alt="Figurinha personalizada" loading="lazy" decoding="async" onerror="this.style.display='none'"><span>Figurinha criada</span></div></div><p>Após o pagamento, combinaremos as fotos, frases, cores e estilos para as suas figurinhas!</p></div>
         </section>
         <section class="form-step" data-step="3"><div class="step-copy"><span>QUASE PRONTO</span><h3>Seu pacote está quase pronto!</h3><p id="contactHelp">Informe seus dados para identificarmos seu pedido.</p></div><div id="summaryLine" class="tema-info"></div>          <div class="compact-fields">
             <label><span>Seu nome *</span><input required name="Nome" placeholder="Como podemos te chamar?"></label>
@@ -244,7 +249,7 @@
     </section>
   </main>
 
-  <footer><img src="assets/logo.webp" alt="" width="800" height="auto" loading="lazy" decoding="async"><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
+  <footer><img src="assets/logo-sm.webp" alt="" width="240" height="240" loading="lazy" decoding="async"><p>Figurinhas personalizadas que aproximam sua marca dos seus clientes.</p><small>© <span id="year"></span> Comércio em Figurinha. · <a href="regulamento.html" style="color:#d8c7be;text-decoration:underline">Regulamento</a></small></footer>
 
   <dialog id="imageLightbox" class="image-lightbox" aria-label="Prévia ampliada do pacote"><div class="lightbox-content"><button type="button" id="closeLightbox" aria-label="Fechar imagem">Fechar <span aria-hidden="true">×</span></button><div class="lightbox-image-wrap"><img id="lightboxImg" alt="Prévia ampliada do pacote" decoding="async" draggable="false"></div></div></dialog>
 
@@ -254,16 +259,19 @@
     <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
   </a>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-config.js"></script>
-  <script src="js/supabase-client.js"></script>
-  <script src="js/progress.js"></script>
-  <script src="js/script.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="js/supabase-config.js"></script>
+  <script defer src="js/supabase-client.js"></script>
+  <script defer src="js/progress.js"></script>
+  <script defer src="js/script.js"></script>
   <script type="text/javascript">
+    // Microsoft Clarity: carregado após o load da página, em tempo ocioso, para não competir com o conteúdo.
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        function go(){t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}
+        function idle(){(c.requestIdleCallback?c.requestIdleCallback(go,{timeout:4000}):setTimeout(go,2000));}
+        if(l.readyState==="complete")idle();else c.addEventListener("load",idle);
     })(window, document, "clarity", "script", "yqek3lqi6x");
  </script>
 </body>

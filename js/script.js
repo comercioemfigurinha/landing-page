@@ -33,10 +33,12 @@ function persistChoice(){nicheInput.value=chosenNiche;modelInput.value=chosenMod
 function renderModels(){
   persistChoice();
   temaInfo.textContent=`Nicho selecionado: ${chosenNiche.replaceAll('-',' ')}`;
-  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><span class="basic-image-protected"><img src="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" draggable="false" onerror="this.style.opacity='.15'"></span><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
+  document.querySelector('#modelGrid').innerHTML=[1,2,3].map(n=>{const id=`${chosenNiche}-${String(n).padStart(2,'0')}`;const path=`assets/pacotes/${chosenNiche}/modelo-${String(n).padStart(2,'0')}.webp`;return `<div class="model-card ${chosenModel===id?'chosen':''}"><button type="button" class="model-select" data-id="${id}"><span class="basic-image-protected"><img src="${thumb(path)}" data-full="${path}" alt="Pacote ${n} de ${chosenNiche}" loading="lazy" decoding="async" draggable="false" onerror="${imgFallback}"></span><strong>Modelo 0${n}</strong><span>${chosenModel===id?'✓ Selecionado':'Escolher pacote'}</span></button><button type="button" class="model-zoom" data-path="${path}" aria-label="Ampliar modelo ${n}">⛶ Ampliar</button></div>`}).join('');
   document.querySelectorAll('.model-select').forEach(b=>b.onclick=()=>{chosenModel=b.dataset.id;renderModels()});
   document.querySelectorAll('.model-zoom').forEach(b=>b.onclick=()=>openLightbox(b.dataset.path, true));
 }
+const thumb = p => p.replace(/\.webp$/, '-thumb.webp');
+const imgFallback = "if(!this.dataset.f){this.dataset.f=1;this.src=this.dataset.full}else{this.style.opacity='.15'}";
 const lightbox = document.querySelector('#imageLightbox');
 const lightboxImg = document.querySelector('#lightboxImg');
 const closeLightboxBtn = document.querySelector('#closeLightbox');
@@ -263,7 +265,7 @@ function renderCardBack(card){
   if(active<0)active=0;
   slides.forEach((slide,i)=>{
     const item=document.createElement('button');item.type='button';item.className='flip-slide';
-    item.innerHTML=basic?`<span class="basic-image-protected flip-basic-image"><img src="${slide.image}" alt="${slide.label}" loading="lazy" decoding="async" draggable="false"></span><span>${slide.label}</span>`:`<div class="premium-pair"><div><img src="${slide.photo}" alt="Foto original ${i+1}" loading="lazy"><small>Foto original</small></div><div><img src="${slide.sticker}" alt="Figurinha criada ${i+1}" loading="lazy"><small>Figurinha criada</small></div></div><span>${slide.label}</span>`;
+    item.innerHTML=basic?`<span class="basic-image-protected flip-basic-image"><img src="${thumb(slide.image)}" data-full="${slide.image}" alt="${slide.label}" loading="lazy" decoding="async" draggable="false" onerror="${imgFallback}"></span><span>${slide.label}</span>`:`<div class="premium-pair"><div><img src="${thumb(slide.photo)}" data-full="${slide.photo}" alt="Foto original ${i+1}" loading="lazy" decoding="async" onerror="${imgFallback}"><small>Foto original</small></div><div><img src="${thumb(slide.sticker)}" data-full="${slide.sticker}" alt="Figurinha criada ${i+1}" loading="lazy" decoding="async" onerror="${imgFallback}"><small>Figurinha criada</small></div></div><span>${slide.label}</span>`;
     item.querySelectorAll('img').forEach(img=>img.addEventListener('error',e=>{e.target.style.opacity='.2'}));
     item.addEventListener('click',()=>{if(i!==active){activate(i);return;}if(basic){chosenModel=slide.id;renderModels();activate(i)}else{activate(i)}});
     track.appendChild(item);
