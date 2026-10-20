@@ -28,6 +28,7 @@ function apply(o){
   if(!st){st=document.createElement('style');st.id='tema-css';document.head.appendChild(st)}
   st.textContent=`:root{--line:color-mix(in srgb,var(--orange) 16%,#fff);--muted:color-mix(in srgb,var(--ink) 62%,#fff);--shadow:0 20px 50px color-mix(in srgb,var(--ink) 12%,transparent);--sh:color-mix(in srgb,var(--orange) 30%,transparent);--shs:color-mix(in srgb,var(--ink) 8%,transparent)}
 .hero{background:radial-gradient(circle at 85% 10%,var(--soft,#ffe5d0) 0,transparent 28%),linear-gradient(135deg,#fff 40%,var(--cream))!important}
+.lp-v2 .hero{background:#fff!important}
 .benefits article>span,.phrase-row b{background:var(--soft,#fff1e8)}
 .btn.primary,.submit,.price-single{box-shadow:0 12px 30px var(--sh)}
 .phone-card{box-shadow:0 30px 80px color-mix(in srgb,var(--ink) 25%,transparent)}
@@ -43,7 +44,7 @@ footer{background:color-mix(in srgb,var(--ink) 75%,#000)}footer p{color:var(--so
 .upload-box{background:var(--cream);border-color:var(--line)}.review-card div{background:var(--cream)}
 #cefLoading{background:color-mix(in srgb,var(--ink) 55%,transparent)}`;
   function T(sel,x){var e=document.querySelector(sel);if(e&&x)e.textContent=x}
-  T('.hero .eyebrow',o.eyebrow);T('.hero-copy > p',o.subtitulo);T('.hero .btn.primary',o.btn_hero);T('.top-cta',o.btn_topo);/* Título da escolha de pacotes é fixo em todos os nichos. */
+  T('.hero .eyebrow',o.eyebrow);T('.hero-description, .hero-copy > p',o.subtitulo);T('.hero .btn.primary',o.btn_hero);T('.top-cta',o.btn_topo);/* Título da escolha de pacotes é fixo em todos os nichos. */
   if(o.titulo){var h=document.querySelector('.hero h1');if(h)h.innerHTML=esc(o.titulo).replace(/\*(.+?)\*/g,'<span>$1</span>')}
   var n=document.querySelector('input[name=Nome]'),c=document.querySelector('input[name=Comercio]');
   if(n&&o.ph_nome)n.placeholder=o.ph_nome;if(c&&o.ph_comercio)c.placeholder=o.ph_comercio;
