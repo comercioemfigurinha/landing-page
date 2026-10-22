@@ -14,7 +14,7 @@ temaField.value = temaAtual;
 const temaInfo = document.querySelector('#temaInfo');
 const nomeTema = temaAtual ? temaAtual.replace(/[-_]/g, ' ') : 'seu nicho';
 temaInfo.textContent = `Escolhendo figurinhas para: ${nomeTema}`;
-estiloField.value = 'Pronto';
+estiloField.value = 'Personalizado';
 
 const nicheInput = document.querySelector('#nichoEscolhido'), modelInput = document.querySelector('#modeloEscolhido');
 const availableNiches = ['confeitaria'];
@@ -97,7 +97,15 @@ function updateContactFields(){
 }
 function updateChoice(){const basic=isBasic();document.querySelector('#basicPicker').hidden=!basic;document.querySelector('#customPreview').hidden=basic;document.querySelector('#choiceHeading').textContent=basic?'Escolha seu pacote de 9 figurinhas':'Como ficaria sua personagem?';document.querySelector('#choiceDesc').textContent=basic?'Escolha 1 dos 3 modelos. Toque em ampliar para ver os detalhes.':'Veja a transformação da foto em figurinha personalizada. As informações da sua marca serão coletadas após o pagamento.';updateContactFields();persistChoice();}
 renderModels();
-if(saved.plano==='Personalizado'){document.querySelector('#personalizadoCard input').checked=true;estiloField.value='Personalizado';document.querySelector('#prontoCard').classList.remove('selected');document.querySelector('#personalizadoCard').classList.add('selected');}
+const initialPlan = saved.plano === 'Pronto' ? 'Pronto' : 'Personalizado';
+const initialBasic = initialPlan === 'Pronto';
+document.querySelector('#prontoCard input').checked = initialBasic;
+document.querySelector('#personalizadoCard input').checked = !initialBasic;
+estiloField.value = initialPlan;
+document.querySelector('#prontoCard').classList.toggle('selected', initialBasic);
+document.querySelector('#personalizadoCard').classList.toggle('selected', !initialBasic);
+document.querySelector('#prontoCard .offer-choice').textContent = initialBasic ? 'Selecionado ✓' : 'Escolher este pacote →';
+document.querySelector('#personalizadoCard .offer-choice').textContent = initialBasic ? 'Escolher este pacote →' : 'Selecionado ✓';
 updateChoice();
 // UserId único desta visita: nasce na etapa 1 e é reaproveitado até o checkout,
 // assim a mesma linha da planilha vai sendo atualizada (sem duplicar).
