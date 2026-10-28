@@ -16,6 +16,29 @@
     });
   });
 
+  const whatsappFloat = document.querySelector('.whatsapp-float-site');
+  const benefits = document.querySelector('.benefits');
+  if (whatsappFloat && benefits) {
+    let revealAt = 0;
+    let ticking = false;
+    const measure = () => {
+      revealAt = benefits.getBoundingClientRect().top + scrollY - innerHeight * .7;
+    };
+    const updateWhatsapp = () => {
+      whatsappFloat.classList.toggle('is-visible', scrollY >= revealAt);
+      ticking = false;
+    };
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(updateWhatsapp);
+    };
+    measure();
+    updateWhatsapp();
+    addEventListener('scroll', requestUpdate, { passive: true });
+    addEventListener('resize', () => { measure(); requestUpdate(); }, { passive: true });
+  }
+
   const track = document.querySelector('#reviewGrid');
   if (!track) return;
   const cards = [...track.querySelectorAll('.v2-review')];
